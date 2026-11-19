@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#120d0b" />
+  <title>Ember's Porch</title>
+  <!--
+    Local preview (from this folder):
+
+      python3 -m http.server 8080
+
+    Then open http://localhost:8080
+    Opening the file directly also works: missing art stays a gradient,
+    and the browser will not show a broken-image icon.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --night: #120d0b;
+      --paper: #f3e8d6;
+      --paper-edge: #e2d2b8;
+      --ink: #2b211c;
+      --ink-soft: #6b5a4e;
+      --ember: #f2894d;
+      --ember-hot: #ffb585;
+      --ember-deep: #c2501f;
+      --serif: "Fraunces", Georgia, "Times New Roman", serif;
+      --sans: "DM Sans", system-ui, sans-serif;
+      /*
+        Artwork slots
+        --------------
+        Drop files next to index.html and they replace the gradients.
+        A missing file paints nothing for that layer (no broken icon).
+
+        Porch plate:  ./image-3.jpg   (or a Recraft / Figma SVG)
+        Ember:        ./Group-3.svg   (or .png)
+
+        To point at a different export, change only these two lines:
+      */
+      --porch-art: url("./image-3.jpg");
+      --ember-art: url("./Group-3.svg");
+      /* Nudge the letter onto the character's hand once art is in. */
+      --letter-x: 50%;
+      --letter-y: 44%;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      background: var(--night);
+      color: var(--paper);
+      font-family: var(--serif);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    :focus {
+      outline: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--ember-hot);
+      outline-offset: 3px;
+    }
+
+    /* ---------- Porch ---------- */
+
+    .porch {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+      align-items: center;
+      column-gap: 36px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 32px 72px 40px 40px;
+    }
+
+    body[data-view="letter"] .porch {
+      display: none;
+    }
+
+    .porch-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background-color: var(--night);
+      background-image:
+        var(--porch-art),
+        radial-gradient(ellipse 50% 64% at 30% 58%, rgba(194, 80, 31, 0.3), transparent 68%),
+        radial-gradient(ellipse 22% 18% at 80% 16%, rgba(243, 232, 214, 0.16), transparent 72%),
+        linear-gradient(180deg, #120d0b 0%, #1c1210 46%, #2a1a14 100%);
+      background-repeat: no-repeat;
+      background-size: cover, auto, auto, auto;
+      background-position: center, center, center, center;
+    }
+
+    .porch-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(18, 13, 11, 0.18), transparent 28% 64%, rgba(18, 13, 11, 0.42)),
+        radial-gradient(ellipse at 34% 52%, transparent 40%, rgba(8, 5, 4, 0.5) 100%);
+    }
+
+    .brand {
+      position: absolute;
+      top: 28px;
+      left: 36px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--ember);
+      box-shadow: 0 0 12px rgba(242, 137, 77, 0.8);
+    }
+
+    .porch-stage {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      min-height: 560px;
+      padding: 72px 12px 24px;
+    }
+
+    .ember-slot {
+      position: relative;
+      width: min(420px, 100%);
+      height: min(540px, 68vh);
+    }
+
+    .ember-ground,
+    .ember-halo,
+    .ember-figure {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .ember-ground {
+      left: 16%;
+      right: 16%;
+      bottom: 7%;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.45);
+      filter: blur(8px);
+    }
+
+    .ember-halo {
+      inset: 6% 8% 14%;
+      background: radial-gradient(
+        circle at 50% 46%,
+        rgba(255, 196, 150, 0.34),
+        rgba(194, 80, 31, 0.12) 42%,
+        transparent 70%
+      );
+      filter: blur(6px);
+      animation: halo 5.6s ease-in-out infinite;
+    }
+
+    .ember-figure {
+      inset: 0;
+      background-image: var(--ember-art);
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center bottom;
+    }
+
+    #ember-letter {
+      position: absolute;
+      left: var(--letter-x);
+      top: var(--letter-y);
+      z-index: 2;
+      width: 68px;
+      height: 82px;
+      padding: 0;
+      border: 0;
+      border-radius: 3px;
+      background: transparent;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease;
+    }
+
+    #ember-letter:hover,
+    #ember-letter:focus-visible {
+      transform: translate(-50%, -56%);
+    }
+
+    .letter-paper {
+      position: absolute;
+      inset: 0;
+      border-radius: 2px;
+      background:
+        linear-gradient(180deg, #fff8ee 0%, var(--paper) 100%);
+      box-shadow: inset 0 0 0 1px rgba(43, 33, 28, 0.1);
+      transform: rotate(-8deg);
+      animation: letter-glow 3.2s ease-in-out infinite;
+    }
+
+    .letter-paper::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 22px;
+      height: 1px;
+      background: rgba(43, 33, 28, 0.16);
+      box-shadow: 0 8px 0 rgba(43, 33, 28, 0.12), 0 16px 0 rgba(43, 33, 28, 0.1);
+    }
+
+    .letter-paper::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      border-top: 16px solid rgba(194, 80, 31, 0.28);
+      border-left: 16px solid transparent;
+    }
+
+    .letter-flame {
+      position: absolute;
+      left: 50%;
+      top: -20px;
+      width: 14px;
+      height: 22px;
+      margin-left: -7px;
+      border-radius: 50% 50% 46% 46%;
+      background: radial-gradient(circle at 50% 78%, #fff6ea 0%, var(--ember) 42%, var(--ember-deep) 74%, transparent 76%);
+      transform-origin: 50% 100%;
+      pointer-events: none;
+      animation: flame 1.5s ease-in-out infinite;
+    }
+
+    .letter-label {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 28px);
+      width: max-content;
+      max-width: 70vw;
+      padding: 6px 12px;
+      border: 1px solid rgba(243, 232, 214, 0.24);
+      border-radius: 999px;
+      background: rgba(18, 13, 11, 0.94);
+      color: var(--paper);
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: center;
+      white-space: normal;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(6px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    #ember-letter:hover .letter-label,
+    #ember-letter:focus-visible .letter-label {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #ember-letter:hover .letter-paper,
+    #ember-letter:focus-visible .letter-paper {
+      animation: none;
+      filter:
+        drop-shadow(0 0 8px rgba(255, 243, 224, 0.95))
+        drop-shadow(0 0 18px rgba(242, 137, 77, 0.85));
+    }
+
+    .intro-card {
+      position: relative;
+      z-index: 2;
+      justify-self: end;
+      width: 100%;
+      max-width: 400px;
+      padding: 34px 36px 32px;
+      border-radius: 4px;
+      background-color: var(--paper);
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 32%);
+      color: var(--ink);
+      box-shadow:
+        0 26px 56px -14px rgba(0, 0, 0, 0.8),
+        inset 0 0 0 1px rgba(160, 130, 95, 0.22);
+    }
+
+    .intro-card h1 {
+      margin: 0;
+      font-size: clamp(24px, 2.2vw, 30px);
+      font-weight: 600;
+      line-height: 1.22;
+      letter-spacing: -0.02em;
+    }
+
+    .intro-card hr {
+      margin: 22px 0;
+      border: 0;
+      border-top: 1px solid rgba(43, 33, 28, 0.14);
+    }
+
+    .intro-copy {
+      margin: 0;
+      font-size: 16.5px;
+      line-height: 1.6;
+    }
+
+    .intro-meta {
+      margin: 16px 0 0;
+      color: var(--ink-soft);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .intro-cta {
+      margin-top: 32px;
+    }
+
+    .intro-try {
+      margin: 0 0 10px;
+      color: var(--ember-deep);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--ember-deep);
+      color: #fffaf2;
+      font-family: var(--sans);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(194, 80, 31, 0.28);
+    }
+
+    .btn:hover {
+      background: #a84318;
+    }
+
+    .btn[aria-pressed="true"] {
+      background: #2f5e44;
+      box-shadow: 0 8px 18px rgba(34, 72, 50, 0.28);
+    }
+
+    .card-status {
+      margin: 12px 0 0;
+      color: var(--ember-deep);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* ---------- Letter ---------- */
+
+    .letter {
+      display: none;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(242, 137, 77, 0.18), transparent 46%),
+        var(--night);
+    }
+
+    .letter:focus,
+    .letter:focus-visible {
+      outline: none;
+    }
+
+    body[data-view="letter"] .letter {
+      display: block;
+    }
+
+    .back {
+      position: fixed;
+      top: max(18px, env(safe-area-inset-top));
+      left: max(18px, env(safe-area-inset-left));
+      z-index: 5;
+      height: 40px;
+      padding: 0 16px;
+      border: 1px solid rgba(243, 232, 214, 0.24);
+      border-radius: 999px;
+      background: rgba(28, 21, 18, 0.88);
+      color: var(--paper);
+      font-family: var(--sans);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .back:hover {
+      border-color: var(--ember);
+      color: var(--ember-hot);
+    }
+
+    .letter-sheet {
+      width: min(680px, calc(100% - 40px));
+      margin: 96px auto 72px;
+      padding: 56px 56px 48px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 22%),
+        var(--paper);
+      color: var(--ink);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 1px rgba(160, 130, 95, 0.2);
+    }
+
+    .dateline {
+      margin: 0;
+      color: var(--ink-soft);
+      font-style: italic;
+      font-size: 16px;
+    }
+
+    .letter-sheet h1 {
+      margin: 10px 0 0;
+      color: var(--ember-deep);
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .letter-rule {
+      width: 48px;
+      height: 2px;
+      margin: 26px 0 28px;
+      border: 0;
+      background: var(--ember-deep);
+    }
+
+    .letter-body p {
+      margin: 0 0 1.05em;
+      font-size: 1.2rem;
+      line-height: 1.62;
+    }
+
+    .sig {
+      margin: 8px 0 0;
+      color: var(--ember-deep);
+      font-size: 32px;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .ps {
+      margin: 22px 0 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--paper-edge);
+      color: var(--ink-soft);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .sample-note {
+      margin: 18px 0 0;
+      color: var(--ink-soft);
+      font-family: var(--sans);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @keyframes halo {
+      0%,
+      100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes letter-glow {
+      0%,
+      100% {
+        filter: drop-shadow(0 0 5px rgba(242, 137, 77, 0.4));
+      }
+      50% {
+        filter:
+          drop-shadow(0 0 8px rgba(255, 243, 224, 0.9))
+          drop-shadow(0 0 16px rgba(242, 137, 77, 0.7));
+      }
+    }
+
+    @keyframes flame {
+      0%,
+      100% { transform: scale(1, 1) rotate(-4deg); opacity: 0.88; }
+      40% { transform: scale(0.84, 1.14) rotate(5deg); opacity: 1; }
+      70% { transform: scale(1.06, 0.92) rotate(-2deg); opacity: 0.84; }
+    }
+
+    @media (max-width: 900px) {
+      .porch {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+        align-items: end;
+        row-gap: 18px;
+        padding: 76px 16px 20px;
+      }
+
+      .porch-stage {
+        align-self: end;
+        min-height: 0;
+        padding: 0;
+      }
+
+      .ember-slot {
+        width: min(260px, 72vw);
+        height: 340px;
+      }
+
+      .intro-card {
+        justify-self: stretch;
+        max-width: none;
+        padding: 26px 22px 24px;
+      }
+
+      .letter-sheet {
+        padding: 32px 22px 28px;
+        margin-top: 84px;
+      }
+
+      .letter-body p {
+        font-size: 1.05rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ember-halo,
+      .letter-paper,
+      .letter-flame,
+      .letter-label,
+      #ember-letter {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .letter-paper {
+        filter: drop-shadow(0 0 10px rgba(242, 137, 77, 0.72));
+      }
+
+      .letter-flame {
+        opacity: 0.95;
+        transform: none;
+      }
+
+      #ember-letter:hover,
+      #ember-letter:focus-visible {
+        transform: translate(-50%, -50%);
+      }
+    }
+  </style>
+</head>
+<body data-view="porch">
+  <section class="porch" id="porch" aria-label="Ember's Porch">
+    <!--
+      PORCH BACKDROP
+      Painted from --porch-art (./image-3.jpg).
+      Swap in an exported Recraft or Figma SVG by editing that variable.
+      If the file is missing, the night gradient underneath remains.
+    -->
+    <div class="porch-backdrop" aria-hidden="true"></div>
+
+    <p class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Ember
+    </p>
+
+    <div class="porch-stage">
+      <!--
+        EMBER
+        The figure box loads --ember-art (./Group-3.svg).
+        Until that file exists, only the halo and ground show.
+        --letter-x / --letter-y place #ember-letter on the hand.
+      -->
+      <div class="ember-slot">
+        <div class="ember-ground" aria-hidden="true"></div>
+        <div class="ember-halo" aria-hidden="true"></div>
+        <div class="ember-figure" aria-hidden="true"></div>
+
+        <button
+          id="ember-letter"
+          type="button"
+          aria-label="Read a sample Friday letter"
+          aria-expanded="false"
+          aria-controls="letter"
+        >
+          <span class="letter-paper" aria-hidden="true"></span>
+          <span class="letter-flame" aria-hidden="true"></span>
+          <span class="letter-label">Read a sample Friday letter</span>
+        </button>
+      </div>
+    </div>
+
+    <aside class="intro-card">
+      <h1>A letter every Friday about what your job search is adding up to.</h1>
+      <hr />
+      <p class="intro-copy">
+        I look at everything, I keep only your job search, and I never keep what's inside. You never fill anything in.
+      </p>
+      <p class="intro-meta">Works with Claude · Requires a paid Claude plan</p>
+      <div class="intro-cta">
+        <p class="intro-try">Try Ember V1.0 now!</p>
+        <button type="button" class="btn" id="add-to-claude" aria-pressed="false">
+          Add to your Claude
+        </button>
+        <p class="card-status" id="card-status" hidden>
+          Marked for Claude. This preview stays on the porch.
+        </p>
+      </div>
+    </aside>
+  </section>
+
+  <article class="letter" id="letter" tabindex="-1" aria-labelledby="letter-title" aria-hidden="true">
+    <button type="button" class="back" id="back-to-porch">← Back to porch</button>
+    <div class="letter-sheet">
+      <p class="dateline">Friday, October 2</p>
+      <h1 id="letter-title">A quiet week. The fire's still lit.</h1>
+      <hr class="letter-rule" />
+      <div class="letter-body">
+        <p>Hey, Alex. It's Ember. Come sit a minute.</p>
+        <p>Nothing went out this week, Alex. I'm not going to dress that up. But look at something with me.</p>
+        <p>Look back down the road. Every light is an application from August and early September, at least thirty of them. A quiet week doesn't put a single one out.</p>
+        <p>Two no's came in, from Geotab and Loblaw. Here's what I noticed: you applied to them on August 6 and August 17. They took seven weeks and six weeks to answer. So the road behind you is still being read. Silence on the rest isn't an answer yet.</p>
+        <p>And one window is lit up ahead. Last Thursday you talked with Maria at Randstad about a contract role, and you were back in your résumé within the hour. As far as I can see, that one's still open.</p>
+        <p>Here's what I can't see: what this week was. Rest? Or work that doesn't leave a trail, like portfolio pieces or calls? I'd rather ask you than guess.</p>
+        <p>Either way, the fire's here.</p>
+      </div>
+      <p class="sig">— Ember</p>
+      <p class="ps">P.S. If you were working on something I can't see, tell me in any chat and it goes in next Friday's letter.</p>
+      <p class="sample-note">Sample letter for the week of October 2. Names and dates only.</p>
+    </div>
+  </article>
+
+  <script>
+    (function () {
+      const ui = {
+        porch: document.getElementById("porch"),
+        letter: document.getElementById("letter"),
+        trigger: document.getElementById("ember-letter"),
+        back: document.getElementById("back-to-porch"),
+        add: document.getElementById("add-to-claude"),
+        status: document.getElementById("card-status"),
+      };
+
+      if (!ui.porch || !ui.letter || !ui.trigger || !ui.back) return;
+
+      const page = new AbortController();
+      let letterKeys = null;
+
+      const titles = {
+        porch: "Ember's Porch",
+        letter: "A quiet week — Ember's Porch",
+      };
+
+      function show(view) {
+        document.body.dataset.view = view;
+        document.title = titles[view];
+        const letterOpen = view === "letter";
+        ui.porch.setAttribute("aria-hidden", letterOpen ? "true" : "false");
+        ui.letter.setAttribute("aria-hidden", letterOpen ? "false" : "true");
+        ui.trigger.setAttribute("aria-expanded", letterOpen ? "true" : "false");
+        window.scrollTo(0, 0);
+      }
+
+      function openLetter() {
+        if (document.body.dataset.view === "letter") return;
+        show("letter");
+        letterKeys = new AbortController();
+        document.addEventListener("keydown", onLetterKeydown, { signal: letterKeys.signal });
+        ui.letter.focus({ preventScroll: true });
+      }
+
+      function closeLetter() {
+        if (document.body.dataset.view !== "letter") return;
+        if (letterKeys) {
+          letterKeys.abort();
+          letterKeys = null;
+        }
+        show("porch");
+        ui.trigger.focus({ preventScroll: true });
+      }
+
+      function onLetterKeydown(event) {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        closeLetter();
+      }
+
+      /* Enter and Space activate the control. preventDefault on keydown
+         stops the browser from also clicking, so the view cannot open
+         and immediately close. Keyup runs after the key is released. */
+      function onTriggerKeydown(event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+      }
+
+      function onTriggerKeyup(event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (event.repeat) return;
+        event.preventDefault();
+        openLetter();
+      }
+
+      function onTriggerClick(event) {
+        if (event.detail === 0) return;
+        openLetter();
+      }
+
+      ui.trigger.addEventListener("keydown", onTriggerKeydown, { signal: page.signal });
+      ui.trigger.addEventListener("keyup", onTriggerKeyup, { signal: page.signal });
+      ui.trigger.addEventListener("click", onTriggerClick, { signal: page.signal });
+      ui.back.addEventListener("click", closeLetter, { signal: page.signal });
+
+      if (ui.add && ui.status) {
+        ui.add.addEventListener("click", () => {
+          const added = ui.add.getAttribute("aria-pressed") === "true";
+          ui.add.setAttribute("aria-pressed", added ? "false" : "true");
+          ui.add.textContent = added ? "Add to your Claude" : "Added to Claude";
+          ui.status.hidden = added;
+        }, { signal: page.signal });
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ember's Porch — A quiet week (Friday, October 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --night: #120d0b;
+      --umber: #2c1d17;
+      --paper: #f3e8d6;
+      --paper-edge: #e2d2b8;
+      --ink: #2b211c;
+      --ink-soft: #6b5a4e;
+      --ember: #f2894d;
+      --ember-hot: #ffb585;
+      --ember-deep: #c2501f;
+      --serif: "Fraunces", Georgia, serif;
+      --sans: "DM Sans", system-ui, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--night);
+      color: var(--paper);
+      font-family: var(--serif);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body.mode-porch,
+    body.mode-sealed {
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    body.mode-story {
+      overflow-y: auto;
+      height: auto;
+    }
+
+    /* ==================== 1. PORCH LANDING SCENE (#porch-scene) ==================== */
+    #porch-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: radial-gradient(circle at 26% 42%, var(--umber) 0%, var(--night) 78%);
+      transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.6s ease;
+    }
+
+    body:not(.mode-porch) #porch-scene {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .porch-parallax {
+      position: absolute;
+      inset: -24px;
+      width: calc(100% + 48px);
+      height: calc(100% + 48px);
+      transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+      transition: transform 0.35s ease-out;
+      will-change: transform;
+    }
+
+    .porch-scene-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      user-select: none;
+    }
+
+    .cabin-warmth {
+      position: absolute;
+      left: 6%;
+      top: 4%;
+      width: 56%;
+      height: 86%;
+      background: radial-gradient(
+        ellipse at 44% 48%,
+        rgba(255, 184, 136, 0.16) 0%,
+        rgba(242, 137, 77, 0.07) 48%,
+        transparent 74%
+      );
+      pointer-events: none;
+      mix-blend-mode: screen;
+      animation: cabinBreath 5.2s ease-in-out infinite;
+    }
+
+    .porch-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(18, 13, 11, 0.16) 0%, rgba(18, 13, 11, 0.04) 55%, rgba(18, 13, 11, 0.45) 100%),
+        radial-gradient(circle at center, transparent 55%, rgba(10, 7, 6, 0.5) 100%);
+    }
+
+    .brand {
+      position: fixed;
+      top: 20px;
+      left: 24px;
+      z-index: 45;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 9999px;
+      background: var(--ember);
+      box-shadow: 0 0 12px rgba(242, 137, 77, 0.8);
+    }
+
+    .brand-title {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--paper);
+    }
+
+    .ember-character-wrap {
+      position: absolute;
+      left: 41.2%;
+      bottom: 11.4%;
+      width: clamp(142px, 13.5vw, 216px);
+      aspect-ratio: 224 / 374;
+      z-index: 42;
+      transform: translate3d(calc(var(--px, 0px) * 0.45), calc(var(--py, 0px) * 0.45), 0);
+      transition: transform 0.3s ease-out;
+    }
+
+    @media (max-width: 1023px) {
+      .ember-character-wrap {
+        left: 22%;
+        bottom: 7%;
+        width: 150px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .ember-character-wrap {
+        left: 5%;
+        bottom: 3%;
+        width: 122px;
+      }
+    }
+
+    .ember-head-glow {
+      position: absolute;
+      top: -12%;
+      left: -10%;
+      width: 82%;
+      height: 55%;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 184, 136, 0.42) 0%,
+        rgba(242, 137, 77, 0.16) 52%,
+        transparent 75%
+      );
+      pointer-events: none;
+      mix-blend-mode: screen;
+      animation: headHaloPulse 3s ease-in-out infinite;
+    }
+
+    .ember-svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+      filter: drop-shadow(0 10px 16px rgba(8, 5, 4, 0.72));
+    }
+
+    .porch-flame-head {
+      transform-box: fill-box;
+      transform-origin: 50% 90%;
+      animation: porchFlameFlicker 2.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .porch-spark-top {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: porchSparkFloat 2.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Glowing Handheld Letter (#ember-letter) */
+    #ember-letter {
+      cursor: pointer;
+      outline: none;
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: letterGlowPulse 3s ease-in-out infinite;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+    }
+
+    #ember-letter:hover,
+    #ember-letter:focus-visible {
+      animation-play-state: paused;
+      transform: scale(1.18) translate(-2px, -3px);
+      filter:
+        drop-shadow(0 0 8px rgba(255, 243, 224, 0.98))
+        drop-shadow(0 0 18px rgba(242, 137, 77, 0.95));
+    }
+
+    #ember-letter:focus-visible .letter-focus-ring {
+      opacity: 1;
+    }
+
+    .letter-tooltip {
+      position: absolute;
+      top: 28%;
+      left: 88%;
+      white-space: nowrap;
+      background: rgba(24, 17, 14, 0.95);
+      color: var(--paper);
+      border: 1px solid rgba(243, 232, 214, 0.24);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(5px) scale(0.97);
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 44;
+    }
+
+    .ember-character-wrap:hover .letter-tooltip,
+    .ember-character-wrap:focus-within .letter-tooltip,
+    .letter-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .porch-card-stage {
+      position: relative;
+      z-index: 43;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 76px 20px 36px;
+      pointer-events: none;
+    }
+
+    @media (min-width: 1024px) {
+      .porch-card-stage {
+        justify-content: flex-end;
+        padding: 40px 88px 40px 40px;
+      }
+    }
+
+    .intro-card {
+      pointer-events: auto;
+      width: 100%;
+      max-width: 410px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 34px 36px 32px;
+      border-radius: 4px;
+      box-shadow:
+        0 26px 56px -14px rgba(0, 0, 0, 0.8),
+        inset 0 0 0 1px rgba(160, 130, 95, 0.22);
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.35), transparent 60%),
+        linear-gradient(180deg, transparent 96%, rgba(150, 120, 90, 0.08) 96%);
+      background-size: auto, 100% 32px;
+    }
+
+    .intro-card h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(24px, 2.3vw, 30px);
+      line-height: 1.22;
+      color: var(--ink);
+    }
+
+    .intro-divider {
+      border: 0;
+      border-top: 1px solid rgba(43, 33, 28, 0.14);
+      margin: 24px 0;
+    }
+
+    .intro-copy {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+    }
+
+    .intro-meta {
+      margin: 18px 0 0;
+      font-family: var(--serif);
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .intro-cta {
+      margin-top: 38px;
+    }
+
+    .intro-try {
+      margin: 0 0 10px;
+      font-family: var(--serif);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ember-deep);
+    }
+
+    .btn-claude {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding: 0 22px;
+      border-radius: 9999px;
+      border: 0;
+      background: #e26428;
+      color: #fffaf2;
+      font-family: var(--sans);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(194, 80, 31, 0.32);
+      transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-claude:hover {
+      background: #c9521a;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(194, 80, 31, 0.42);
+    }
+
+    .btn-claude:active {
+      transform: scale(0.98);
+    }
+
+    .btn-claude.added {
+      background: #2f5e44;
+      box-shadow: 0 6px 16px rgba(34, 72, 50, 0.32);
+    }
+
+    .status-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translate(-50%, 12px);
+      z-index: 50;
+      background: rgba(24, 17, 14, 0.96);
+      color: var(--paper);
+      border: 1px solid rgba(243, 232, 214, 0.22);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-family: var(--sans);
+      font-size: 13px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+
+    .status-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .star-twinkle {
+      animation: starTwinkle 4.2s ease-in-out infinite;
+    }
+
+    .drifting-spark {
+      animation: driftingSpark 6.8s ease-in-out infinite;
+    }
+
+    @keyframes cabinBreath {
+      0%, 100% { opacity: 0.72; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes porchFlameFlicker {
+      0%, 100% { transform: scale(1, 1) skewX(0deg); }
+      30% { transform: scale(1.03, 0.97) skewX(-1.8deg); }
+      65% { transform: scale(0.98, 1.04) skewX(1.6deg); }
+    }
+
+    @keyframes headHaloPulse {
+      0%, 100% { opacity: 0.75; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.07); }
+    }
+
+    @keyframes porchSparkFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.95; }
+      50% { transform: translateY(-4px) scale(0.88); opacity: 0.65; }
+    }
+
+    @keyframes letterGlowPulse {
+      0%, 100% {
+        filter:
+          drop-shadow(0 0 3px rgba(255, 243, 224, 0.55))
+          drop-shadow(0 0 9px rgba(242, 137, 77, 0.45));
+      }
+      50% {
+        filter:
+          drop-shadow(0 0 8px rgba(255, 244, 228, 0.95))
+          drop-shadow(0 0 18px rgba(242, 137, 77, 0.85));
+      }
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.98; }
+    }
+
+    @keyframes driftingSpark {
+      0% { transform: translate(0, 0) scale(0.8); opacity: 0; }
+      25% { opacity: 0.85; }
+      75% { opacity: 0.55; }
+      100% { transform: translate(16px, -48px) scale(1.1); opacity: 0; }
+    }
+
+    /* ==================== 2. INTERACTIVE STORY WORLD & LETTER ==================== */
+    #world {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      z-index: 1;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.13;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .9  0 0 0 .9 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+    }
+
+    .vig {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 55%, transparent 50%, rgba(6, 4, 3, 0.6) 100%);
+    }
+
+    .warm {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 100%, rgba(242, 137, 77, 0.22), transparent 60%);
+      opacity: 0;
+      transition: opacity 1.2s;
+    }
+
+    body.talking .warm {
+      opacity: 1;
+      animation: warmPulse 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes warmPulse {
+      from { opacity: 0.55; }
+      to { opacity: 1; }
+    }
+
+    .bar {
+      position: fixed;
+      top: 12px;
+      right: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.6s;
+      pointer-events: none;
+      color-scheme: dark;
+    }
+
+    body.mode-story .bar {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bar button,
+    .bar select {
+      font-family: var(--sans);
+      font-size: 13px;
+      height: 34px;
+      line-height: 32px;
+      padding: 0 13px;
+      border-radius: 9999px;
+      border: 1px solid rgba(243, 232, 214, 0.18);
+      background: rgba(28, 21, 18, 0.78);
+      color: var(--paper);
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      white-space: nowrap;
+      flex: none;
+      margin: 0;
+    }
+
+    .bar select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding: 0 30px 0 13px;
+      background: rgba(28, 21, 18, 0.78) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23f3e8d6' stroke-width='1.5' stroke-linecap='round'/></svg>") no-repeat right 12px center;
+      text-overflow: ellipsis;
+    }
+
+    .bar select option {
+      background: #241a16;
+      color: #f3e8d6;
+    }
+
+    .bar select:focus-visible,
+    .bar button:focus-visible {
+      outline: 2px solid var(--ember-hot);
+      outline-offset: 2px;
+    }
+
+    #listen {
+      min-width: 72px;
+    }
+
+    .bar button[aria-pressed="true"] {
+      border-color: var(--ember);
+      color: var(--ember-hot);
+    }
+
+    .proto {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 20;
+      font-family: var(--sans);
+      font-size: 12px;
+      color: rgba(243, 232, 214, 0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s;
+    }
+
+    body.mode-story .proto {
+      opacity: 1;
+    }
+
+    .story {
+      position: relative;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .step {
+      min-height: 115vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 6vw 9vh;
+    }
+
+    .step:first-child {
+      min-height: 100vh;
+    }
+
+    .card {
+      pointer-events: auto;
+      max-width: 440px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 26px 30px 24px;
+      border-radius: 3px;
+      box-shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(160, 130, 95, 0.18);
+      font-size: 20px;
+      line-height: 1.58;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.35), transparent 60%),
+        linear-gradient(180deg, transparent 96%, rgba(150, 120, 90, 0.08) 96%);
+      background-size: auto, 100% 32px;
+      opacity: 0;
+      transform: translateY(24px) rotate(var(--r, -0.6deg));
+      transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+      cursor: pointer;
+    }
+
+    body.mode-story .step.on .card {
+      opacity: 1;
+      transform: translateY(0) rotate(var(--r, -0.6deg));
+    }
+
+    .step:nth-child(even) .card {
+      --r: 0.5deg;
+    }
+
+    .card p {
+      margin: 0;
+    }
+
+    .card p + p {
+      margin-top: 10px;
+    }
+
+    .dateline {
+      font-style: italic;
+      font-size: 15px;
+      color: var(--ink-soft);
+    }
+
+    .story h1 {
+      margin: 6px 0 10px;
+      font-weight: 600;
+      font-size: clamp(34px, 4.4vw, 48px);
+      line-height: 1.04;
+      color: var(--ember-deep);
+    }
+
+    .small {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+
+    .sig {
+      font-style: italic;
+      font-weight: 600;
+      font-size: 32px;
+      color: var(--ember-deep);
+      margin-top: 4px;
+    }
+
+    .ps {
+      font-family: var(--sans);
+      font-size: 15px;
+      color: var(--ink-soft);
+      border-top: 1px solid var(--paper-edge);
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .note {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 14px;
+      border: 1px dashed var(--paper-edge);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .tag {
+      position: fixed;
+      z-index: 4;
+      pointer-events: none;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      color: rgba(243, 232, 214, 0.85);
+      text-shadow: 0 1px 5px #000, 0 0 12px rgba(0, 0, 0, 0.8);
+      transform: translate(-50%, -100%);
+      opacity: 0;
+      transition: opacity 0.9s;
+      white-space: nowrap;
+      padding-bottom: 3px;
+    }
+
+    .tag::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 1px;
+      height: 12px;
+      background: linear-gradient(rgba(243, 232, 214, 0.4), transparent);
+    }
+
+    .tag.on {
+      opacity: 0.78;
+    }
+
+    .tag small {
+      font-family: var(--sans);
+      font-style: normal;
+      font-size: 10.5px;
+      color: rgba(243, 232, 214, 0.58);
+      margin-left: 6px;
+    }
+
+    .nav {
+      position: fixed;
+      right: 14px;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      z-index: 20;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s;
+    }
+
+    body.mode-story .nav {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav button {
+      font-family: var(--sans);
+      font-size: 15px;
+      height: 46px;
+      min-width: 46px;
+      padding: 0 18px;
+      border-radius: 9999px;
+      border: 1px solid rgba(243, 232, 214, 0.25);
+      background: rgba(28, 21, 18, 0.85);
+      color: var(--paper);
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .nav #next {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: #24130b;
+      font-weight: 500;
+    }
+
+    .nav #prev {
+      padding: 0;
+      font-size: 20px;
+    }
+
+    .tip {
+      position: fixed;
+      z-index: 15;
+      pointer-events: none;
+      font-family: var(--sans);
+      font-size: 13px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 6px 10px;
+      border-radius: 6px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translate(-50%, -130%);
+      transition: opacity 0.25s;
+      white-space: nowrap;
+    }
+
+    .tip.on {
+      opacity: 1;
+    }
+
+    /* ==================== 3. WAX-SEALED ENVELOPE ==================== */
+    #seal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(ellipse at 50% 55%, #2a1c16, #0c0807 70%);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    body.mode-sealed #seal {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .seal-back-wrap {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 32;
+    }
+
+    .seal-back-btn {
+      font-family: var(--sans);
+      font-size: 13px;
+      height: 36px;
+      padding: 0 15px;
+      border-radius: 9999px;
+      border: 1px solid rgba(243, 232, 214, 0.22);
+      background: rgba(28, 21, 18, 0.78);
+      color: var(--paper);
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .seal-back-btn:hover {
+      border-color: var(--ember);
+      color: var(--ember-hot);
+    }
+
+    .env-wrap {
+      display: grid;
+      justify-items: center;
+      gap: 26px;
+      perspective: 1400px;
+      padding: 0 16px;
+    }
+
+    .env {
+      position: relative;
+      width: min(520px, 86vw);
+      aspect-ratio: 1.55;
+      transition: transform 1.1s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.8s;
+    }
+
+    .env .back {
+      position: absolute;
+      inset: 0;
+      background: #d9c7a8;
+      border-radius: 4px;
+      box-shadow: 0 40px 80px -30px #000;
+    }
+
+    .env .letter {
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: 10%;
+      bottom: 6%;
+      opacity: 0;
+      z-index: 2;
+      background: var(--paper);
+      border-radius: 2px;
+      padding: 7% 8%;
+      color: var(--ink);
+      transition: transform 1.2s cubic-bezier(0.3, 0, 0.2, 1) 0.7s, opacity 0.3s 0.6s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .env .letter .dl {
+      font-style: italic;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .env .letter .tt {
+      font-weight: 600;
+      font-size: clamp(20px, 3.2vw, 28px);
+      line-height: 1.1;
+      color: var(--ember-deep);
+      margin-top: 6px;
+    }
+
+    .env .front {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      background:
+        linear-gradient(32deg, #e6d5b9 50%, transparent 50.2%) left/50% 100% no-repeat,
+        linear-gradient(-32deg, #e6d5b9 50%, transparent 50.2%) right/50% 100% no-repeat,
+        linear-gradient(0deg, #e9d9be 46%, transparent 46%);
+      pointer-events: none;
+    }
+
+    .env .addr {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 6%;
+      text-align: center;
+      color: var(--ink);
+      pointer-events: none;
+    }
+
+    .env .addr .to {
+      font-style: italic;
+      font-size: clamp(22px, 3.4vw, 30px);
+    }
+
+    .env .addr .d {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .env .flap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 58%;
+      transform-origin: 50% 0;
+      transition: transform 0.9s cubic-bezier(0.5, 0, 0.3, 1) 0.15s;
+      z-index: 3;
+      background: #e0cdae;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.15));
+    }
+
+    .env .wax {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: 104px;
+      height: 104px;
+      margin: -50px 0 0 -52px;
+      z-index: 4;
+      background: none;
+      border: 0;
+      padding: 0;
+      display: block;
+      transition: transform 0.5s, opacity 0.5s;
+      cursor: pointer;
+      filter: drop-shadow(0 5px 6px rgba(40, 12, 2, 0.45)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+    }
+
+    .env .wax svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .env .wax:hover {
+      transform: scale(1.05);
+    }
+
+    .env .wax:focus-visible {
+      outline: 2px solid var(--ember-hot);
+      outline-offset: 4px;
+    }
+
+    .opening .env .wax {
+      transform: scale(1.25);
+      opacity: 0;
+    }
+
+    .opening .env .flap {
+      transform: rotateX(180deg);
+    }
+
+    .opening .env .letter {
+      transform: translateY(-62%);
+      opacity: 1;
+    }
+
+    .opening .env .front,
+    .opening .env .addr {
+      z-index: 3;
+    }
+
+    .opening .env .flap {
+      z-index: 0;
+    }
+
+    .opened .env {
+      transform: translateY(30vh) scale(0.9);
+      opacity: 0;
+    }
+
+    .env-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      transition: opacity 0.4s;
+    }
+
+    .opening .env-actions {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .env-actions button {
+      font-family: var(--sans);
+      font-size: 14px;
+      height: 42px;
+      padding: 0 18px;
+      border-radius: 9999px;
+      cursor: pointer;
+      border: 1px solid rgba(243, 232, 214, 0.25);
+      background: rgba(28, 21, 18, 0.65);
+      color: var(--paper);
+    }
+
+    .env-actions button.primary {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: #24130b;
+      font-weight: 500;
+    }
+
+    .hint {
+      font-family: var(--sans);
+      font-size: 12px;
+      color: rgba(243, 232, 214, 0.5);
+    }
+
+    .spark {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ember-hot);
+      pointer-events: none;
+      z-index: 35;
+      box-shadow: 0 0 8px var(--ember);
+    }
+
+    /* World SVG Animation Classes */
+    .tw {
+      animation: tw 4s ease-in-out infinite;
+    }
+
+    @keyframes tw {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 0.9; }
+    }
+
+    .smoke {
+      animation: smoke 7s linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes smoke {
+      0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+      15% { opacity: 0.35; }
+      100% { transform: translate(22px, -120px) scale(2.2); opacity: 0; }
+    }
+
+    .shimmer {
+      animation: shim 5s ease-in-out infinite;
+    }
+
+    @keyframes shim {
+      0%, 100% { opacity: 0.15; transform: translateX(0); }
+      50% { opacity: 0.55; transform: translateX(6px); }
+    }
+
+    .fly {
+      animation: fly 9s ease-in-out infinite;
+    }
+
+    @keyframes fly {
+      0%, 100% { transform: translate(0, 0); opacity: 0.2; }
+      30% { opacity: 1; }
+      50% { transform: translate(18px, -26px); }
+      70% { opacity: 0.3; }
+    }
+
+    .flick {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation: flick 1.6s ease-in-out infinite;
+    }
+
+    @keyframes flick {
+      0%, 100% { transform: scale(1, 1) skewX(0); }
+      25% { transform: scale(0.96, 1.05) skewX(-3deg); }
+      50% { transform: scale(1.03, 0.97) skewX(2deg); }
+      75% { transform: scale(0.98, 1.04) skewX(-1deg); }
+    }
+
+    .rise {
+      animation: rise 2.4s linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes rise {
+      0% { transform: translate(0, 0); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translate(var(--dx, 6px), -70px); opacity: 0; }
+    }
+
+    .lit-glow {
+      transition: opacity 0.9s;
+    }
+
+    .lant .bodyp {
+      transition: fill 0.6s;
+    }
+
+    #ember .halo {
+      transition: opacity 0.4s;
+    }
+
+    #ember.talk .halo {
+      animation: talk 0.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes talk {
+      from { opacity: 0.75; }
+      to { opacity: 1; }
+    }
+
+    .legs .l1 {
+      transform-box: fill-box;
+      transform-origin: 50% 0;
+    }
+
+    .legs .l2 {
+      transform-box: fill-box;
+      transform-origin: 50% 0;
+    }
+
+    .walking .l1 {
+      animation: stepA 0.55s ease-in-out infinite alternate;
+    }
+
+    .walking .l2 {
+      animation: stepA 0.55s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes stepA {
+      from { transform: rotate(18deg); }
+      to { transform: rotate(-18deg); }
+    }
+
+    .walking .bodyg {
+      animation: bounce 0.275s ease-in-out infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-2px); }
+    }
+
+    .hitc {
+      fill: transparent;
+      cursor: pointer;
+    }
+
+    @media (max-width: 520px) {
+      .env .wax {
+        width: 74px;
+        height: 74px;
+        margin: -40px 0 0 -37px;
+        top: 50%;
+      }
+      .env .addr {
+        bottom: 5%;
+      }
+      .env .addr .to {
+        font-size: 20px;
+      }
+      .env .addr .d {
+        font-size: 11px;
+      }
+      .bar {
+        top: 8px;
+        right: 8px;
+      }
+      .bar button,
+      .bar select {
+        height: 32px;
+        line-height: 30px;
+        font-size: 12px;
+        padding: 0 11px;
+      }
+      .bar select {
+        padding-right: 26px;
+        max-width: 120px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .step {
+        min-height: 100vh;
+        padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+      }
+      .card {
+        max-width: none;
+        width: 100%;
+        font-size: 18px;
+        padding: 20px 22px;
+      }
+      .step {
+        padding: 0 14px 6vh;
+      }
+      .proto {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      .porch-parallax,
+      .ember-character-wrap {
+        transform: none !important;
+      }
+      #ember-letter {
+        filter:
+          drop-shadow(0 0 6px rgba(255, 243, 224, 0.85))
+          drop-shadow(0 0 14px rgba(242, 137, 77, 0.72));
+      }
+    }
+  </style>
+</head>
+<body class="mode-porch">
+  <!-- ==================== 1. CABIN PORCH LANDING SCENE ==================== -->
+  <section id="porch-scene" aria-label="Ember's Porch night cabin scene">
+    <div class="porch-parallax" id="porch-parallax">
+      <svg
+        class="porch-scene-svg"
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0b0807" />
+            <stop offset="55%" stop-color="#17100d" />
+            <stop offset="100%" stop-color="#2c1d17" />
+          </linearGradient>
+          <linearGradient id="wallGrad" x1="0" y1="0" x2="1" y2="0.4">
+            <stop offset="0%" stop-color="#2c1710" />
+            <stop offset="65%" stop-color="#3c2015" />
+            <stop offset="100%" stop-color="#482618" />
+          </linearGradient>
+          <linearGradient id="roomGrad" x1="0" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stop-color="#f7b787" />
+            <stop offset="55%" stop-color="#ed9b66" />
+            <stop offset="100%" stop-color="#d97c4a" />
+          </linearGradient>
+          <linearGradient id="doorSpill" x1="0.2" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stop-color="#f2894d" stop-opacity="0.52" />
+            <stop offset="55%" stop-color="#8f3c18" stop-opacity="0.28" />
+            <stop offset="100%" stop-color="#120d0b" stop-opacity="0" />
+          </linearGradient>
+          <linearGradient id="winSpill" x1="0.2" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stop-color="#f2894d" stop-opacity="0.44" />
+            <stop offset="100%" stop-color="#120d0b" stop-opacity="0" />
+          </linearGradient>
+          <radialGradient id="moonGlowPorch">
+            <stop offset="0%" stop-color="#f3e8d6" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#f3e8d6" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+
+        <!-- Night Sky & Crescent Moon -->
+        <rect x="0" y="0" width="1600" height="620" fill="url(#skyGrad)" />
+        <circle cx="1235" cy="128" r="76" fill="url(#moonGlowPorch)" />
+        <circle cx="1235" cy="128" r="20" fill="#f3e8d6" opacity="0.85" />
+        <circle cx="1244" cy="121" r="17" fill="#0d0908" />
+
+        <!-- Distant Ridge -->
+        <path d="M860 485 L1600 505 L1600 620 L860 620 Z" fill="#231612" />
+
+        <!-- Twinkling Stars -->
+        <g fill="#f3e8d6">
+          <circle class="star-twinkle" style="animation-delay: 0.2s" cx="1028" cy="82" r="2.2" />
+          <circle class="star-twinkle" style="animation-delay: 1.1s" cx="1216" cy="40" r="2.6" />
+          <circle class="star-twinkle" style="animation-delay: 2.0s" cx="1294" cy="108" r="2.7" />
+          <circle class="star-twinkle" style="animation-delay: 0.7s" cx="1376" cy="91" r="2.4" />
+          <circle class="star-twinkle" style="animation-delay: 2.8s" cx="1352" cy="116" r="1.8" />
+          <circle class="star-twinkle" style="animation-delay: 1.6s" cx="1334" cy="144" r="2.2" />
+          <circle class="star-twinkle" style="animation-delay: 3.3s" cx="1270" cy="168" r="2.3" />
+          <circle class="star-twinkle" style="animation-delay: 0.4s" cx="1228" cy="168" r="2.6" />
+          <circle class="star-twinkle" style="animation-delay: 2.4s" cx="1118" cy="234" r="2.2" />
+          <circle class="star-twinkle" style="animation-delay: 1.4s" cx="1170" cy="64" r="1.6" />
+          <circle class="star-twinkle" style="animation-delay: 3.7s" cx="1430" cy="54" r="1.7" />
+        </g>
+
+        <!-- Night Pine Silhouettes -->
+        <g fill="#121210">
+          <polygon points="940,40 845,215 895,215 835,345 895,345 845,495 1065,495 1010,345 1055,345 1000,215 1045,215" />
+          <polygon points="1560,-20 1445,215 1505,215 1425,375 1495,375 1405,495 1620,495 1620,-20" />
+          <rect x="1552" y="490" width="48" height="290" />
+        </g>
+
+        <!-- Forest & Porch Ground -->
+        <path d="M0 610 L940 538 L1600 580 L1600 900 L0 900 Z" fill="#171310" />
+
+        <!-- Cabin Wall & Log Lines -->
+        <g>
+          <polygon points="0,0 835,0 915,82 938,638 225,845 0,810" fill="url(#wallGrad)" />
+          <polygon points="835,0 955,112 935,134 812,0" fill="#1a0e09" />
+          <g stroke="#1c0e08" stroke-width="3.5" opacity="0.72">
+            <line x1="0" y1="68" x2="885" y2="112" />
+            <line x1="0" y1="146" x2="916" y2="178" />
+            <line x1="0" y1="228" x2="922" y2="248" />
+            <line x1="0" y1="312" x2="926" y2="318" />
+            <line x1="0" y1="396" x2="930" y2="388" />
+            <line x1="0" y1="482" x2="933" y2="462" />
+            <line x1="0" y1="566" x2="936" y2="534" />
+            <line x1="0" y1="654" x2="938" y2="606" />
+          </g>
+        </g>
+
+        <!-- Open Doorway, Interior Room, Desk, Lantern & Book -->
+        <g>
+          <polygon points="198,38 640,94 640,748 226,842" fill="#23120b" />
+          <polygon points="246,88 602,130 508,208 246,184" fill="#b5653b" />
+          <polygon points="246,184 402,216 402,568 250,598" fill="url(#roomGrad)" />
+          <circle cx="352" cy="435" r="102" fill="#fde0c2" opacity="0.45" />
+          <polygon points="402,216 508,208 508,554 402,568" fill="#e39366" />
+          <line x1="436" y1="224" x2="436" y2="455" stroke="#b76a42" stroke-width="2.5" opacity="0.6" />
+          <polygon points="508,120 602,130 602,718 508,690" fill="#9e4f2b" />
+          <line x1="556" y1="158" x2="556" y2="345" stroke="#6e3319" stroke-width="2.5" opacity="0.65" />
+          <polygon points="250,598 508,554 602,718 252,824" fill="#8b583c" />
+          <g stroke="#2c1910" stroke-width="3.5" opacity="0.82">
+            <line x1="251" y1="646" x2="528" y2="594" />
+            <line x1="251" y1="696" x2="555" y2="638" />
+            <line x1="252" y1="748" x2="582" y2="678" />
+            <line x1="252" y1="794" x2="602" y2="714" />
+          </g>
+
+          <!-- Desk -->
+          <g>
+            <polygon points="295,586 462,566 476,606 312,626" fill="#5a3725" opacity="0.7" />
+            <polygon points="274,474 304,478 302,606 270,602" fill="#462819" />
+            <polygon points="392,478 416,478 416,584 392,584" fill="#3a2014" />
+            <polygon points="444,484 480,480 484,638 446,642" fill="#3b2115" />
+            <polygon points="480,480 528,472 536,612 484,638" fill="#2a160d" />
+            <polygon points="270,466 368,454 528,468 480,484 270,476" fill="#6d432d" />
+            <polygon points="270,476 480,484 480,502 270,492" fill="#4b2b1c" />
+          </g>
+
+          <!-- Desk Lantern -->
+          <g>
+            <ellipse cx="360" cy="466" rx="20" ry="4" fill="#23120b" />
+            <rect x="342" y="458" width="36" height="8" rx="2" fill="#2a160d" />
+            <path d="M346 458 L344 426 L376 426 L374 458 Z" fill="#fde4c8" stroke="#2a160d" stroke-width="2.5" />
+            <path d="M360 434 C365 442 365 450 360 454 C355 450 355 442 360 434 Z" fill="#f2894d" />
+            <path d="M341 426 L360 412 L379 426 Z" fill="#2a160d" />
+            <path d="M348 414 C346 396 374 396 372 414" fill="none" stroke="#2a160d" stroke-width="2.5" />
+          </g>
+
+          <!-- Open Book & Stool -->
+          <polygon points="382,470 432,462 456,472 412,480" fill="#2a160d" />
+          <path d="M384 468 Q410 456 434 464 Q456 456 486 466 L456 476 Q434 468 412 476 Z" fill="#f7e5d0" />
+          <polygon points="528,566 574,562 602,568 564,576" fill="#a66b4b" />
+          <polygon points="528,566 564,576 558,660 516,646" fill="#6f422b" />
+          <polygon points="564,576 602,568 602,654 558,660" fill="#4e2d1d" />
+        </g>
+
+        <!-- Four-Pane Window -->
+        <g>
+          <polygon points="704,180 874,200 874,474 704,484" fill="#4b2819" />
+          <polygon points="714,194 862,212 862,460 714,470" fill="#f5ac7b" />
+          <polygon points="714,194 784,202 784,326 714,328" fill="#fad0ad" opacity="0.55" />
+          <polygon points="714,338 784,336 784,464 714,470" fill="#fad0ad" opacity="0.4" />
+          <polygon points="782,200 794,202 794,464 782,465" fill="#4b2819" />
+          <polygon points="712,326 864,330 864,342 712,338" fill="#4b2819" />
+        </g>
+
+        <!-- Porch Light Spill -->
+        <g>
+          <polygon points="292,832 636,756 1080,872 680,900 410,900" fill="url(#doorSpill)" />
+          <g fill="url(#winSpill)">
+            <polygon points="948,762 1036,738 1110,758 1022,784" />
+            <polygon points="1050,734 1134,712 1208,730 1124,754" />
+            <polygon points="862,788 954,764 1034,786 942,814" />
+            <polygon points="968,760 1056,736 1136,756 1048,782" />
+          </g>
+        </g>
+
+        <!-- Firewood (Bottom Left) -->
+        <g>
+          <polygon points="0,746 38,722 184,774 166,818 18,766" fill="#32231b" />
+          <polygon points="18,766 166,818 152,844 4,790" fill="#231812" />
+          <polygon points="166,818 184,774 162,786 152,844" fill="#4a362b" />
+          <polygon points="0,796 146,842 128,882 0,836" fill="#291d16" />
+          <polygon points="146,842 128,882 88,884 106,832" fill="#443227" />
+          <polygon points="164,812 224,816 234,856 172,852" fill="#3b2b22" />
+          <polygon points="124,878 186,854 198,900 0,900 0,836" fill="#231812" />
+          <polygon points="198,856 242,864 252,900 198,900" fill="#3f2e24" />
+        </g>
+
+        <!-- Stones -->
+        <g>
+          <polygon points="874,672 918,644 964,634 1012,654 1030,684 994,708 914,708 878,694" fill="#3d3129" />
+          <polygon points="918,644 964,634 996,650 964,674 904,676" fill="#4d3e34" />
+          <polygon points="802,714 832,684 872,682 898,704 892,724 852,730 812,728" fill="#42352c" />
+          <polygon points="1328,804 1364,772 1446,758 1510,762 1514,784 1476,818 1396,832 1334,824" fill="#332821" />
+          <polygon points="1364,772 1446,758 1486,764 1450,792 1364,798" fill="#473930" />
+          <polygon points="1280,884 1312,836 1366,834 1456,858 1492,882 1486,900 1280,900" fill="#3c2f27" />
+        </g>
+
+        <!-- Drifting Firelight Sparks -->
+        <g fill="#ffb888">
+          <circle class="drifting-spark" style="animation-delay: 0s" cx="760" cy="640" r="2.2" />
+          <circle class="drifting-spark" style="animation-delay: 2.1s" cx="845" cy="610" r="1.8" />
+          <circle class="drifting-spark" style="animation-delay: 4.3s" cx="690" cy="675" r="2" />
+        </g>
+      </svg>
+
+      <div class="cabin-warmth" aria-hidden="true"></div>
+    </div>
+
+    <div class="porch-vignette" aria-hidden="true"></div>
+
+    <div class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <span class="brand-title">Ember</span>
+    </div>
+
+    <!-- Seated Ember on Porch Stone -->
+    <div class="ember-character-wrap" id="ember-wrap">
+      <div class="ember-head-glow" aria-hidden="true"></div>
+
+      <svg
+        class="ember-svg"
+        viewBox="0 0 224 374"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Ember seated on the porch stone holding a glowing letter"
+      >
+        <ellipse cx="106" cy="364" rx="78" ry="8.5" fill="#090605" opacity="0.72" />
+
+        <g>
+          <polygon points="0,360 12,316 22,306 28,284 42,276 58,284 44,358" fill="#3d2b22" />
+          <polygon points="16,360 44,282 140,262 170,266 178,286 172,302 182,318 224,356 224,360" fill="#2a1e18" />
+          <polygon points="136,262 170,266 154,276 134,274" fill="#463126" />
+        </g>
+
+        <g fill="#181310">
+          <rect x="112" y="302" width="22" height="50" />
+          <path d="M118 304 L152 304 L152 348 C164 348 172 356 173 372 L119 372 Z" />
+        </g>
+
+        <path
+          d="M42 156 C32 166 29 194 33 224 L40 250 C31 260 30 278 40 284 L92 284 L96 328 L172 302 L134 236 L108 232 L106 168 Z"
+          fill="#34454d"
+        />
+        <path d="M92 284 L108 284 L102 325 L96 328 Z" fill="#26333a" />
+
+        <g>
+          <polygon points="41,154 49,158 106,248 99,254" fill="#8a6040" />
+          <path d="M53 244 L102 244 L106 286 L53 286 Z" fill="#7a5235" />
+          <path d="M53 244 L102 244 L103 256 C94 270 62 270 53 256 Z" fill="#68452c" />
+          <ellipse cx="77.5" cy="266" rx="3.5" ry="2.5" fill="#f2894d" />
+          <rect x="74" y="271" width="7" height="2.5" rx="1" fill="#2e1e16" />
+        </g>
+
+        <g>
+          <path
+            d="M144 176 L156 170 C163 168 168 175 166 182 C164 188 156 191 149 192 Z"
+            fill="#7a5235"
+          />
+          <path
+            d="M66 168 L104 202 L144 176 L159 203 L104 236 L58 194 Z"
+            fill="#34454d"
+          />
+        </g>
+
+        <!-- Glowing Handheld Letter (#ember-letter) -->
+        <g
+          id="ember-letter"
+          role="button"
+          tabindex="0"
+          aria-label="Read a sample Friday letter"
+        >
+          <rect x="144" y="130" width="58" height="58" rx="12" fill="transparent" />
+          <rect
+            class="letter-focus-ring"
+            x="150"
+            y="137"
+            width="46"
+            height="46"
+            rx="8"
+            stroke="#fff3e0"
+            stroke-width="1.5"
+            stroke-dasharray="3 3"
+            opacity="0"
+          />
+          <path
+            d="M175.8 142.5L190.5 152.2L166.8 182.6L155.4 176.2L155.8 168.4L175.8 142.5Z"
+            fill="#fff3e0"
+          />
+          <path
+            d="M175.8 142.5L183.2 147.4L161.2 179.4L155.4 176.2L155.8 168.4L175.8 142.5Z"
+            fill="#e2d2b8"
+            opacity="0.72"
+          />
+        </g>
+
+        <path
+          d="M52 136 C49 128 60 124 76 126 C92 128 106 128 107 136 C108 140 105 143 103 144 C112 148 116 158 108 165 C98 173 62 172 46 161 C36 154 38 142 50 139 Z"
+          fill="#c2501f"
+        />
+
+        <path
+          class="porch-spark-top"
+          d="M55.5 1C52.8 6.4 50.8 11.2 52.8 15.1C54.3 18 57.4 17.8 58.6 14.8C60.1 11 57.6 5.8 55.5 1Z"
+          fill="#f2894d"
+        />
+
+        <g class="porch-flame-head">
+          <path
+            d="M66 8C71.5 22 69 37 64 47C63.2 42 61.8 38.5 60 36C59.5 46 56 54 49 60C39 68 38 82 42 93C40 107 45 123 57 132C68 140 87 141 99 133C114 124 126 111 123 91C121 78 115 69 107 63C105 58 102 55 100 54C99.5 59 99 63 98.5 66C97 44 85 21 66 8Z"
+            fill="#f2894d"
+          />
+          <path
+            d="M81 46C76 62 64 77 56 93C49 107 52 126 65 135C76 142 92 141 101 132C111 122 111 103 103 88C95 73 84 61 81 46Z"
+            fill="#ffb888"
+          />
+        </g>
+      </svg>
+
+      <div class="letter-tooltip" id="letter-tooltip" role="status">
+        Read a sample Friday letter
+      </div>
+    </div>
+
+    <div class="porch-card-stage">
+      <div class="intro-card">
+        <h1>A letter every Friday about what your job search is adding up to.</h1>
+        <hr class="intro-divider" />
+        <p class="intro-copy">
+          I look at everything, I keep only your job search, and I never keep what's inside. You never fill anything in.
+        </p>
+        <p class="intro-meta">
+          Works with Claude &middot; Requires a paid Claude plan
+        </p>
+        <div class="intro-cta">
+          <p class="intro-try">Try Ember V1.0 now!</p>
+          <button type="button" class="btn-claude" id="add-claude-btn">
+            Add to your Claude
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-toast" id="porch-toast" role="status" aria-live="polite">
+      Ember connector added &mdash; ready for Claude Settings &middot; Connectors.
+    </div>
+  </section>
+
+  <!-- ==================== 2. INTERACTIVE LANDSCAPE & LETTER ==================== -->
+  <svg id="world" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0d0908" />
+        <stop offset=".55" stop-color="#1a1210" />
+        <stop offset=".85" stop-color="#2c1d17" />
+        <stop offset="1" stop-color="#3a241a" />
+      </linearGradient>
+      <radialGradient id="gLight">
+        <stop offset="0" stop-color="#ffcf9e" stop-opacity=".9" />
+        <stop offset=".18" stop-color="#f2894d" stop-opacity=".5" />
+        <stop offset=".55" stop-color="#c2501f" stop-opacity=".12" />
+        <stop offset="1" stop-color="#8a3510" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="gSoft">
+        <stop offset="0" stop-color="#f2894d" stop-opacity=".45" />
+        <stop offset="1" stop-color="#f2894d" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="gSpill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb585" stop-opacity=".75" />
+        <stop offset="1" stop-color="#f2894d" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="gDoor" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe2c2" />
+        <stop offset="1" stop-color="#f2894d" />
+      </linearGradient>
+      <linearGradient id="gFl" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#fff1dc" />
+        <stop offset=".3" stop-color="#ffc98f" />
+        <stop offset=".65" stop-color="#f2894d" />
+        <stop offset="1" stop-color="#c2501f" />
+      </linearGradient>
+      <radialGradient id="gMoon">
+        <stop offset="0" stop-color="#f6ece2" stop-opacity=".25" />
+        <stop offset="1" stop-color="#f6ece2" stop-opacity="0" />
+      </radialGradient>
+      <filter id="soft4"><feGaussianBlur stdDeviation="4" /></filter>
+      <filter id="soft2"><feGaussianBlur stdDeviation="1.4" /></filter>
+      <filter id="fog"><feGaussianBlur stdDeviation="22" /></filter>
+    </defs>
+    <rect width="1600" height="900" fill="url(#gSky)" />
+    <g id="stars"></g>
+    <g id="moon">
+      <circle cx="1240" cy="150" r="90" fill="url(#gMoon)" />
+      <circle cx="1240" cy="150" r="26" fill="#f1e4d2" opacity=".9" />
+      <circle cx="1252" cy="142" r="23" fill="#120d0b" />
+    </g>
+    <g id="L-far"></g>
+    <g id="L-mid"></g>
+    <g id="L-main"></g>
+    <g id="L-fore"></g>
+  </svg>
+
+  <div class="warm" id="warm"></div>
+  <div class="grain"></div>
+  <div class="vig"></div>
+
+  <div class="proto">Sample letter &middot; a quiet week (Oct 2)</div>
+
+  <div class="bar">
+    <button type="button" id="back-to-porch-btn">&larr; Back to porch</button>
+    <button type="button" id="sound" aria-pressed="false">Sound</button>
+    <select id="voice" aria-label="Ember's voice">
+      <option value="ember">Voice: Ember</option>
+      <option value="ember-soft">Voice: Ember, hushed</option>
+      <option value="ember-gb">Voice: Ember, British</option>
+    </select>
+    <button type="button" id="listen" aria-pressed="false">Listen</button>
+  </div>
+
+  <!-- ==================== 3. WAX-SEALED ENVELOPE ==================== -->
+  <div id="seal" role="dialog" aria-label="Sealed Friday letter from Ember">
+    <div class="seal-back-wrap">
+      <button type="button" class="seal-back-btn" id="seal-back-btn">&larr; Back to porch</button>
+    </div>
+
+    <div class="env-wrap">
+      <div class="env" id="env">
+        <div class="back"></div>
+        <div class="letter">
+          <div class="dl">Friday, October 2</div>
+          <div class="tt">A quiet week. The fire's still lit.</div>
+        </div>
+        <div class="front"></div>
+        <div class="flap"></div>
+        <div class="addr">
+          <div class="to">For Alex</div>
+          <div class="d">from Ember &middot; Friday, October 2</div>
+        </div>
+        <button class="wax" id="wax" aria-label="Break the seal and open the letter">
+          <svg viewBox="-60 -60 120 120">
+            <defs>
+              <radialGradient id="wx" cx="38%" cy="32%" r="75%">
+                <stop offset="0" stop-color="#ef7d45" />
+                <stop offset=".4" stop-color="#c94c1e" />
+                <stop offset=".78" stop-color="#972f0e" />
+                <stop offset="1" stop-color="#651c07" />
+              </radialGradient>
+              <radialGradient id="wxin" cx="50%" cy="50%" r="50%">
+                <stop offset=".55" stop-color="#3a0e02" stop-opacity="0" />
+                <stop offset="1" stop-color="#3a0e02" stop-opacity=".45" />
+              </radialGradient>
+              <radialGradient id="wxp" cx="45%" cy="40%" r="60%">
+                <stop offset="0" stop-color="#b8441a" />
+                <stop offset="1" stop-color="#8d2b0c" />
+              </radialGradient>
+              <filter id="wxb"><feGaussianBlur stdDeviation="2.2" /></filter>
+              <filter id="wxs"><feGaussianBlur stdDeviation=".7" /></filter>
+            </defs>
+            <path d="M0 -50 C 18 -53 35 -45 45 -31 C 55 -17 53 1 50 13 C 55 19 59 28 53 34 C 47 40 41 37 38 32 C 30 43 18 50 3 50 C -9 51 -19 53 -23 60 C -27 65 -34 61 -32 54 C -41 48 -49 38 -51 22 C -55 6 -53 -14 -45 -28 C -37 -43 -19 -50 0 -50 Z" fill="url(#wx)" />
+            <path d="M0 -50 C 18 -53 35 -45 45 -31 C 55 -17 53 1 50 13 C 55 19 59 28 53 34 C 47 40 41 37 38 32 C 30 43 18 50 3 50 C -9 51 -19 53 -23 60 C -27 65 -34 61 -32 54 C -41 48 -49 38 -51 22 C -55 6 -53 -14 -45 -28 C -37 -43 -19 -50 0 -50 Z" fill="url(#wxin)" />
+            <path d="M-40 -26 C -30 -42 -12 -48 6 -47" stroke="#ffb07a" stroke-width="2.4" fill="none" opacity=".45" filter="url(#wxs)" stroke-linecap="round" />
+            <circle cx="0" cy="0" r="33" fill="url(#wxp)" />
+            <circle cx="0" cy="0" r="33" fill="none" stroke="#5e1a06" stroke-width="3" opacity=".7" />
+            <circle cx="0" cy="0" r="30" fill="none" stroke="#e98652" stroke-width="1" opacity=".35" stroke-dasharray="60 130" transform="rotate(200)" />
+            <g transform="translate(0 4) scale(.5)">
+              <path d="M0 -58 C 10 -40 30 -22 28 4 C 26 26 13 38 0 38 C -13 38 -26 26 -28 4 C -30 -20 -16 -30 -6 -46 C -4 -36 -1 -30 0 -58 Z" fill="#7a240a" />
+              <path d="M0 -58 C 10 -40 30 -22 28 4 C 26 26 13 38 0 38" fill="none" stroke="#f39a62" stroke-width="2.4" opacity=".55" transform="translate(-1.5 -1.5)" />
+            </g>
+            <ellipse cx="-17" cy="-27" rx="15" ry="6" fill="#fff" opacity=".38" transform="rotate(-32 -17 -27)" filter="url(#wxb)" />
+            <circle cx="24" cy="-20" r="2.6" fill="#fff" opacity=".55" filter="url(#wxs)" />
+            <circle cx="-30" cy="58" r="1.6" fill="#fff" opacity=".3" />
+          </svg>
+        </button>
+      </div>
+      <div class="env-actions">
+        <button type="button" class="primary" id="openListen">Open, and read it to me</button>
+        <button type="button" id="openQuiet">Open</button>
+      </div>
+      <div class="hint">Break the wax seal or choose an open option above.</div>
+    </div>
+  </div>
+
+  <!-- ==================== 4. MULTI-STEP LETTER STORY CARDS ==================== -->
+  <main class="story" id="story">
+    <section
+      class="step"
+      data-step="0"
+      data-say="Hey, Alex. It's Ember. Come sit a minute. It was a quiet week. Nothing went out this week, Alex. I'm not going to dress that up. But look at something with me."
+    >
+      <div class="card">
+        <div class="dateline">Friday, October 2</div>
+        <h1>A quiet week. The fire's still lit.</h1>
+        <p>Nothing went out this week, Alex. I'm not going to dress that up. But look at something with me.</p>
+      </div>
+    </section>
+
+    <section
+      class="step"
+      data-step="1"
+      data-say="Look back down the road. Every light is an application from August and early September, at least thirty of them. A quiet week doesn't put a single one of them out."
+    >
+      <div class="card">
+        <p>Look back down the road. Every light is an application from August and early September, at least thirty of them. A quiet week doesn't put a single one out.</p>
+        <p class="small">Tap any light. Tap this card to go on.</p>
+      </div>
+    </section>
+
+    <section
+      class="step"
+      data-step="2"
+      data-say="Two no's came in, from Geotab and Loblaw. Here's what I noticed: you applied to them on August 6 and August 17. They took seven weeks and six weeks to answer. So the road behind you is still being read. Silence on the rest isn't an answer yet."
+    >
+      <div class="card">
+        <p>Two no's came in, from Geotab and Loblaw. Here's what I noticed: you applied to them on August 6 and August 17. They took seven weeks and six weeks to answer.</p>
+        <p>So the road behind you is still being read. Silence on the rest isn't an answer yet.</p>
+      </div>
+    </section>
+
+    <section
+      class="step"
+      data-step="3"
+      data-say="And one window is lit up ahead. Last Thursday you talked with Maria at Randstad about a contract role, and you were back in your résumé within the hour. As far as I can see, that one's still open."
+    >
+      <div class="card">
+        <p>And one window is lit up ahead. Last Thursday you talked with Maria at Randstad about a contract role, and you were back in your résumé within the hour. As far as I can see, that one's still open.</p>
+      </div>
+    </section>
+
+    <section
+      class="step"
+      data-step="4"
+      data-say="Here's what I can't see: what this week was. Rest? Or work that doesn't leave a trail, like portfolio pieces or calls? I'd rather ask you than guess."
+    >
+      <div class="card">
+        <p>Here's what I can't see: what this week was. Rest? Or work that doesn't leave a trail, like portfolio pieces or calls? I'd rather ask you than guess.</p>
+      </div>
+    </section>
+
+    <section
+      class="step"
+      data-step="5"
+      data-say="Either way, the fire's here. Tell me whenever you like. Good night, Alex."
+    >
+      <div class="card">
+        <p>Either way, the fire's here.</p>
+        <p class="sig">&mdash;Ember</p>
+        <p class="ps">P.S. If you were working on something I can't see, tell me in any chat and it goes in next Friday's letter.</p>
+        <div class="note">
+          Prototype: a world made for a week with nothing sent. No walking and no new lanterns; you stay by the fire and the letter looks back, then asks. Nothing from after October 2 appears. Facts are from your inbox, calendar and Drive (names and dates only); "at least thirty" is a minimum from confirmation emails.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="nav">
+    <button type="button" id="prev" aria-label="Back">&lsaquo;</button>
+    <button type="button" id="next">Next &rsaquo;</button>
+  </div>
+  <div class="tip" id="tip"></div>
+
+  <script>
+    (function () {
+      const NS = 'http://www.w3.org/2000/svg';
+      const $ = (id) => document.getElementById(id);
+      const el = (t, a, p) => {
+        const e = document.createElementNS(NS, t);
+        for (const k in a) e.setAttribute(k, a[k]);
+        if (p) p.appendChild(e);
+        return e;
+      };
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---------- Porch Parallax & Intro Card ---------- */
+      const porchParallax = $('porch-parallax');
+      const emberWrap = $('ember-wrap');
+      const emberLetter = $('ember-letter');
+      const letterTooltip = $('letter-tooltip');
+      const addClaudeBtn = $('add-claude-btn');
+      const porchToast = $('porch-toast');
+
+      if (!reducedMotion) {
+        window.addEventListener(
+          'pointermove',
+          (e) => {
+            if (!document.body.classList.contains('mode-porch')) return;
+            const nx = (e.clientX / window.innerWidth - 0.5) * -14;
+            const ny = (e.clientY / window.innerHeight - 0.5) * -10;
+            porchParallax.style.setProperty('--px', `${nx.toFixed(1)}px`);
+            porchParallax.style.setProperty('--py', `${ny.toFixed(1)}px`);
+            emberWrap.style.setProperty('--px', `${nx.toFixed(1)}px`);
+            emberWrap.style.setProperty('--py', `${ny.toFixed(1)}px`);
+          },
+          { passive: true }
+        );
+
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            if (document.body.classList.contains('mode-porch')) {
+              letterTooltip.classList.add('visible');
+              setTimeout(() => letterTooltip.classList.remove('visible'), 2400);
+            }
+          }, 1100);
+        });
+      }
+
+      let toastTimer = null;
+      addClaudeBtn.addEventListener('click', () => {
+        try {
+          const temp = document.createElement('input');
+          temp.value = 'https://ember.letters/mcp/claude';
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+        } catch (_) {}
+
+        addClaudeBtn.classList.add('added');
+        addClaudeBtn.textContent = 'Added to Claude';
+        porchToast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => porchToast.classList.remove('show'), 3200);
+      });
+
+      /* ---------- Interactive Landscape World ---------- */
+      let seed = 7;
+      const rnd = () => {
+        seed |= 0;
+        seed = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+      const J = (v, a) => v + (rnd() - 0.5) * 2 * a;
+
+      function hand(pts, j = 1.6, close = true) {
+        const out = [];
+        const n = pts.length;
+        for (let i = 0; i < (close ? n : n - 1); i++) {
+          const [x1, y1] = pts[i];
+          const [x2, y2] = pts[(i + 1) % n];
+          const L = Math.hypot(x2 - x1, y2 - y1);
+          const s = Math.max(1, Math.round(L / 26));
+          for (let k = 0; k < s; k++) {
+            const t = k / s;
+            out.push([J(x1 + (x2 - x1) * t, j), J(y1 + (y2 - y1) * t, j)]);
+          }
+        }
+        if (!close) out.push(pts[n - 1]);
+        return 'M' + out.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' L') + (close ? ' Z' : '');
+      }
+
+      function ridge(x0, x1, base, amp, step, phase, j) {
+        let d = `M${x0} 1400 L${x0} ${base}`;
+        for (let x = x0; x <= x1; x += step) {
+          const y =
+            base -
+            amp * (0.55 + 0.45 * Math.sin(x / 430 + phase)) * (0.6 + 0.4 * Math.sin(x / 170 + phase * 2)) +
+            J(0, j);
+          d += ` L${x} ${y.toFixed(1)}`;
+        }
+        return `${d} L${x1} 1400 Z`;
+      }
+
+      const st = $('stars');
+      for (let i = 0; i < 170; i++) {
+        const c = el(
+          'circle',
+          {
+            cx: rnd() * 1600,
+            cy: rnd() * 520,
+            r: (rnd() * 1.3 + 0.3).toFixed(2),
+            fill: '#f6ece2',
+            class: rnd() < 0.35 ? 'tw' : ''
+          },
+          st
+        );
+        c.style.opacity = (0.2 + rnd() * 0.6).toFixed(2);
+        c.style.animationDelay = `${(rnd() * 4).toFixed(2)}s`;
+      }
+
+      const GY = 780;
+      const Lf = $('L-far'),
+        Lm = $('L-mid'),
+        L = $('L-main'),
+        Lfo = $('L-fore');
+
+      el('rect', { x: -4000, y: 520, width: 10000, height: 180, fill: '#c2501f', opacity: 0.06, filter: 'url(#fog)' }, Lf);
+      el('path', { d: ridge(-3000, 5200, 600, 150, 60, 1.2, 3), fill: '#211714' }, Lf);
+      el(
+        'path',
+        {
+          d: ridge(-3000, 5200, 600, 150, 60, 1.2, 3)
+            .replace(/ L-?\d+ 1400 Z$/, '')
+            .replace(/^M-?\d+ 1400 L/, 'M'),
+          fill: 'none',
+          stroke: '#4a3a33',
+          'stroke-width': 1.5,
+          opacity: 0.5
+        },
+        Lf
+      );
+      el('path', { d: ridge(-3000, 5200, 680, 90, 50, 2.6, 3), fill: '#1c1311' }, Lf);
+
+      const noHouses = [
+        ['Geotab', 660, 'applied Aug 6 · said no Sep 28'],
+        ['Loblaw', 870, 'applied Aug 17 · said no Sep 29']
+      ];
+      noHouses.forEach(([n, x, tp], i) => {
+        const g = el('g', { transform: `translate(${x} ${574 - i * 6})` }, Lf);
+        el('path', { d: hand([[-18, 0], [18, 0], [18, -20], [0, -34], [-18, -20]], 0.8), fill: '#3b2c25' }, g);
+        el('path', { d: 'M-18 -20 L0 -34 L18 -20', stroke: '#7b6a5f', 'stroke-width': 1.2, fill: 'none', opacity: 0.6 }, g);
+        el('rect', { x: -4, y: -14, width: 7, height: 8, fill: '#120c0a' }, g);
+        const h = el('circle', { cx: 0, cy: -14, r: 26, class: 'hitc', tabindex: 0, role: 'button', 'aria-label': n }, g);
+        h.dataset.tip = `${n} · ${tp}`;
+      });
+
+      el('path', { d: ridge(-3000, 7000, 735, 60, 44, 4.1, 2), fill: '#211713' }, Lm);
+      for (let i = 0; i < 120; i++) {
+        const x = -2600 + i * 80 + J(0, 30);
+        const y = 708 + Math.sin(x / 430 + 4.1) * -20 + J(0, 6);
+        const h = 40 + rnd() * 60;
+        el('path', { d: hand([[x, y], [x - h * 0.28, y], [x, y - h], [x + h * 0.28, y]], 1.2), fill: i % 3 ? '#1c1411' : '#181110' }, Lm);
+      }
+      const fogs = [];
+      for (let i = 0; i < 8; i++) {
+        const f = el('ellipse', { cx: -1500 + i * 1100, cy: 735, rx: 520, ry: 34, fill: '#c9a58a', opacity: 0.06, filter: 'url(#fog)' }, Lm);
+        fogs.push(f);
+      }
+
+      el('path', { d: ridge(-2000, 8200, GY - 6, 10, 40, 0, 1.5), fill: '#1b1310' }, L);
+      let pd = `M-2000 ${GY + 10}`;
+      for (let x = -2000; x <= 8200; x += 40) pd += ` L${x} ${(GY + 6 + Math.sin(x / 300) * 4 + J(0, 1)).toFixed(1)}`;
+      for (let x = 8200; x >= -2000; x -= 40) pd += ` L${x} ${(GY + 30 + Math.sin(x / 260) * 5 + J(0, 1.2)).toFixed(1)}`;
+      el('path', { d: `${pd} Z`, fill: '#33241d' }, L);
+
+      for (let i = 0; i < 260; i++) {
+        const x = -1900 + i * 39 + J(0, 14);
+        el('ellipse', { cx: x, cy: GY + 10 + rnd() * 22, rx: 2 + rnd() * 3, ry: 1 + rnd() * 1.2, fill: '#46322a', opacity: 0.6 }, L);
+      }
+      el('rect', { x: -2000, y: GY + 30, width: 10200, height: 700, fill: '#170f0d' }, L);
+
+      for (let i = 0; i < 520; i++) {
+        const x = -2000 + rnd() * 10200;
+        const y = GY + 40 + Math.pow(rnd(), 1.4) * 420;
+        const s = 0.6 + ((y - GY) / 420) * 1.4;
+        const c = ['#2a1b1f', '#25171a', '#1e1513', '#2f1f1e'][Math.floor(rnd() * 4)];
+        el('path', { d: hand([[x - 14 * s, y], [x - 8 * s, y - 10 * s], [x, y - 14 * s], [x + 9 * s, y - 9 * s], [x + 15 * s, y]], 1.2 * s), fill: c }, L);
+      }
+
+      for (let i = 0; i < 90; i++) {
+        const x = -2000 + rnd() * 10200;
+        const y = GY + 50 + rnd() * 300;
+        const s = 0.8 + rnd() * 1.6;
+        el('path', { d: hand([[x - 12 * s, y], [x - 9 * s, y - 8 * s], [x + 4 * s, y - 10 * s], [x + 12 * s, y - 3 * s], [x + 10 * s, y + 2]], 1), fill: '#2b211c' }, L);
+        el('path', { d: `M${x - 8 * s} ${y - 8 * s} L${x + 4 * s} ${y - 10 * s}`, stroke: '#4a3a30', 'stroke-width': 1.4, opacity: 0.6 }, L);
+      }
+
+      for (let i = 0; i < 400; i++) {
+        const x = -2000 + i * 26 + J(0, 10);
+        const y = GY - 2 + J(0, 3);
+        const h = 6 + rnd() * 12;
+        el(
+          'path',
+          {
+            d: `M${x} ${y} q ${J(-2, 2)} ${-h * 0.6} ${J(-3, 3)} ${-h} M${x + 3} ${y} q ${J(2, 2)} ${-h * 0.5} ${J(4, 3)} ${-h * 0.8}`,
+            stroke: '#2b1f19',
+            'stroke-width': 1.6,
+            fill: 'none'
+          },
+          L
+        );
+      }
+
+      function house(x, w, h, roof, { lit = [], door = null, name = null, big = false } = {}) {
+        const g = el('g', {}, L);
+        const y = GY;
+        el('path', { d: hand([[x - w / 2, y], [x + w / 2, y], [x + w / 2, y - h], [x - w / 2, y - h]], 1.4), fill: big ? '#3a2a22' : '#33261f' }, g);
+        el('path', { d: hand([[x + w * 0.32, y], [x + w / 2, y], [x + w / 2, y - h], [x + w * 0.32, y - h]], 1), fill: '#000', opacity: 0.18 }, g);
+        for (let k = 0; k < Math.round((w * h) / 900); k++) {
+          const sx = x - w / 2 + 8 + rnd() * (w - 16);
+          const sy = y - h + 8 + rnd() * (h - 16);
+          el('path', { d: `M${sx} ${sy} h${6 + rnd() * 10}`, stroke: '#4a382e', 'stroke-width': 1.6, opacity: 0.5 }, g);
+        }
+        el('path', { d: hand([[x - w / 2 - 12, y - h + 4], [x + w / 2 + 12, y - h + 4], [x + 6, y - h - roof], [x - 6, y - h - roof]], 1.6), fill: '#261b16' }, g);
+        el('path', { d: `M${x - w / 2 - 12} ${y - h + 4} L${x - 6} ${y - h - roof} L${x + 6} ${y - h - roof}`, stroke: '#5a463a', 'stroke-width': 2, fill: 'none', opacity: 0.7 }, g);
+        const cx = x + w * 0.24;
+        el('path', { d: hand([[cx - 8, y - h - roof * 0.45], [cx + 8, y - h - roof * 0.45], [cx + 8, y - h - roof * 0.95], [cx - 8, y - h - roof * 0.95]], 0.8), fill: '#21170f' }, g);
+        for (let s = 0; s < 3; s++) {
+          el('circle', { cx, cy: y - h - roof * 0.98, r: 7, fill: '#5b4a42', class: 'smoke', style: `animation-delay:${(s * 2.3 + rnd() * 2).toFixed(1)}s` }, g);
+        }
+        const glows = [];
+        lit.forEach(([wx, wy, ww, wh]) => {
+          const gl = el('circle', { cx: x + wx + ww / 2, cy: y - h + wy + wh / 2, r: ww * 2.2, fill: 'url(#gSoft)', class: 'lit-glow' }, g);
+          glows.push(gl);
+          el('path', { d: hand([[x + wx, y - h + wy], [x + wx + ww, y - h + wy], [x + wx + ww, y - h + wy + wh], [x + wx, y - h + wy + wh]], 0.6), fill: '#f2894d' }, g);
+          el('path', { d: `M${x + wx + ww / 2} ${y - h + wy} v${wh} M${x + wx} ${y - h + wy + wh / 2} h${ww}`, stroke: '#7a3412', 'stroke-width': 2, opacity: 0.6 }, g);
+        });
+        if (door) {
+          const [dx, dw, dh] = door;
+          el('path', { d: hand([[x + dx, y], [x + dx + dw, y], [x + dx + dw, y - dh], [x + dx, y - dh]], 0.6), fill: 'url(#gDoor)' }, g);
+          el('path', { d: `M${x + dx + dw} ${y} L${x + dx + dw + 14} ${y + 4} L${x + dx + dw + 14} ${y - dh + 6} L${x + dx + dw} ${y - dh} Z`, fill: '#5a4436' }, g);
+          el('path', { d: `M${x + dx} ${y + 2} L${x + dx + dw} ${y + 2} L${x + dx + dw + 160} ${y + 60} L${x + dx - 120} ${y + 60} Z`, fill: 'url(#gSpill)', opacity: 0.55 }, g);
+          el('circle', { cx: x + dx + dw / 2, cy: y - dh / 2, r: 150, fill: 'url(#gLight)', opacity: 0.6 }, g);
+        }
+        if (name) {
+          const hc = el('circle', { cx: x, cy: y - h / 2, r: Math.max(w, h) * 0.6, class: 'hitc', tabindex: 0, role: 'button', 'aria-label': name[0] }, g);
+          hc.dataset.tip = name.join(' · ');
+        }
+        return { g, glows };
+      }
+
+      house(3900, 130, 104, 64, { lit: [[-34, 30, 26, 28]], name: ['Randstad', 'call with Maria · Thu Sep 24'] });
+
+      const apps = Array.from({ length: 30 }, (_, i) =>
+        i === 6
+          ? ['Geotab', 'applied Aug 6 · said no Sep 28, still lit']
+          : i === 15
+          ? ['Loblaw', 'applied Aug 17 · said no Sep 29, still lit']
+          : i === 28
+          ? ['Multi-Health Systems', 'applied Sep 7']
+          : i === 29
+          ? ['Medfar', 'applied Sep 16']
+          : ['One of at least 30', 'August to mid-September']
+      );
+
+      const lants = apps.map(([n, t], i) => {
+        const x = 700 + i * 48;
+        const side = i % 2 ? -1 : 1;
+        const y = GY + (side > 0 ? 2 : 30);
+        const g = el('g', { class: 'lant', transform: `translate(${x} ${y})` }, L);
+        const glow = el('circle', { cx: 0, cy: -52, r: 90, fill: 'url(#gLight)', class: 'lit-glow', opacity: 0 }, g);
+        const pool = el('ellipse', { cx: 0, cy: 4, rx: 60, ry: 9, fill: '#f2894d', opacity: 0, filter: 'url(#soft4)', class: 'lit-glow' }, g);
+        el('path', { d: hand([[-1.6, 4], [1.6, 4], [1.4, -36], [-1.4, -36]], 0.3), fill: '#120c0a' }, g);
+        const body = el('path', { d: 'M0 -36 c12 0 15 -8 15 -17 c0 -10 -6 -17 -15 -18 c-9 1 -15 8 -15 18 c0 9 3 17 15 17 Z', fill: '#3b2a21', class: 'bodyp' }, g);
+        el('path', { d: 'M-7 -71 h14 M-7 -36 h14', stroke: '#1c120d', 'stroke-width': 2.4 }, g);
+        const h = el('circle', { cx: 0, cy: -50, r: 30, class: 'hitc', tabindex: 0, role: 'button', 'aria-label': `${n}, ${t}` }, g);
+        h.dataset.tip = `${n} · ${t}`;
+        return { x, glow, pool, body, on: false };
+      });
+
+      const hearth = el('g', { transform: 'translate(-2750 0)' }, L);
+      const hglow = el('circle', { cx: 5700, cy: GY - 40, r: 260, fill: 'url(#gLight)', opacity: 0.35 }, hearth);
+      el('path', { d: hand([[5640, GY + 8], [5760, GY - 6], [5764, GY + 4], [5644, GY + 18]], 1), fill: '#2a1a12' }, hearth);
+      el('path', { d: hand([[5646, GY - 6], [5756, GY + 12], [5752, GY + 20], [5642, GY + 4]], 1), fill: '#24170f' }, hearth);
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 2;
+        el('ellipse', { cx: 5700 + Math.cos(a) * 62, cy: GY + 10 + Math.sin(a) * 12, rx: 12, ry: 7, fill: '#3d2c24' }, hearth);
+      }
+      el('ellipse', { cx: 5700, cy: GY + 4, rx: 30, ry: 6, fill: '#ff9a55', opacity: 0.55, filter: 'url(#soft2)' }, hearth);
+      el('path', { d: hand([[5520, GY + 6], [5600, GY + 6], [5600, GY - 18], [5520, GY - 18]], 1.2), fill: '#3a281f' }, hearth);
+      for (let i = 0; i < 6; i++) {
+        el('circle', { cx: 5700 + J(0, 14), cy: GY - 30, r: 1.8, fill: '#ffcf9e', class: 'rise', style: `animation-delay:${(i * 0.4).toFixed(1)}s;--dx:${J(0, 14).toFixed(0)}px` }, hearth);
+      }
+
+      [[1000, GY - 90], [1700, GY - 90], [2500, GY - 60], [2950, GY - 120], [3900, GY - 110]].forEach(([x, y]) => {
+        for (let i = 0; i < 5; i++) {
+          el('circle', { cx: x + J(0, 120), cy: y + J(0, 60), r: 1.8, fill: '#ffcf9e', class: 'fly', style: `animation-delay:${(rnd() * 9).toFixed(1)}s` }, L);
+        }
+      });
+
+      const FL = 'M-2 0 C -15 -2 -19 -15 -14 -27 C -11 -35 -4 -41 -6 -56 C 1 -51 4 -45 5 -38 C 9 -47 9 -59 2 -74 C 17 -59 21 -41 18 -25 C 16 -10 9 0 -2 0 Z';
+      const FLin = 'M0 -3 C -8 -4 -10 -13 -7 -20 C -5 -25 0 -29 1 -39 C 9 -28 11 -18 9 -11 C 8 -6 4 -3 0 -3 Z';
+      const FLlick = 'M-9 -66 c 3 -4 3 -8 1 -13 c 5 4 7 10 3 14 c -1 2 -3 1 -4 -1 Z';
+
+      function flame(p, tf, back) {
+        const g = el('g', { transform: tf || '' }, p);
+        const f = el('g', { class: 'flick' }, g);
+        el('path', { d: FL, fill: back ? '#c2501f' : 'url(#gFl)', opacity: back ? 0.85 : 1 }, f);
+        if (!back) {
+          el('path', { d: FLin, fill: '#fff3df', opacity: 0.8 }, f);
+          el('path', { d: FLlick, fill: '#f2894d', opacity: 0.9 }, f);
+        }
+        f.style.animationDelay = `${(-rnd() * 1.6).toFixed(2)}s`;
+        return g;
+      }
+
+      const fig = el('g', { id: 'you' }, L);
+      el('ellipse', { cx: 0, cy: 2, rx: 24, ry: 4.5, fill: '#000', opacity: 0.45 }, fig);
+      el('ellipse', { cx: 0, cy: 4, rx: 70, ry: 9, fill: '#f2894d', opacity: 0.22, filter: 'url(#soft4)' }, fig);
+
+      function torso(p) {
+        el('path', { d: 'M-9 -76 Q-16 -60 -12 -45', stroke: '#26333a', 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }, p);
+        el('path', { d: 'M-13 -80 Q0 -86 13 -80 L17 -29 Q0 -24 -17 -29 Z', fill: '#34454d' }, p);
+        el('path', { d: 'M3 -83 L4 -27', stroke: '#26333a', 'stroke-width': 1.6 }, p);
+        el('path', { d: 'M-17 -29 Q0 -24 17 -29', stroke: '#26333a', 'stroke-width': 2, fill: 'none' }, p);
+        el('path', { d: 'M-11 -79 L15 -44', stroke: '#8a6040', 'stroke-width': 2.2 }, p);
+        el('path', { d: 'M9 -77 Q19 -60 15 -45', stroke: '#3d5059', 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }, p);
+        el('path', { d: hand([[11, -47], [33, -47], [32, -30], [12, -30]], 0.5), fill: '#7a5235' }, p);
+        el('path', { d: 'M11 -41 h22', stroke: '#4f331f', 'stroke-width': 1.6 }, p);
+        el('path', { d: 'M-7 -84 l-12 17 l7 2 l9 -15 Z', fill: '#b5481b' }, p);
+        el('path', { d: 'M-11 -83 Q0 -77 11 -83 L11 -90 Q0 -85 -11 -90 Z', fill: '#d9581f' }, p);
+        el('path', { d: 'M-13 -80 Q0 -86 13 -80', stroke: '#ffb585', 'stroke-width': 1.5, fill: 'none', opacity: 0.8 }, p);
+        el('path', { d: 'M13 -80 Q19 -66 16 -50', stroke: '#ffb585', 'stroke-width': 1, fill: 'none', opacity: 0.45 }, p);
+        el('circle', { cx: 0, cy: -108, r: 95, fill: 'url(#gLight)', opacity: 0.85 }, p);
+        flame(p, 'translate(0 -87) scale(.66)');
+        for (let i = 0; i < 3; i++) {
+          el('circle', { cx: J(0, 6), cy: -134, r: 1.6, fill: '#ffe2c2', class: 'rise', style: `animation-delay:${(i * 0.8).toFixed(1)}s;--dx:${J(0, 10).toFixed(0)}px` }, p);
+        }
+      }
+
+      const figIn = el('g', { class: 'legs' }, fig);
+      el('path', { class: 'l1', d: 'M-8 -34 L-9 -3 L-12 0 L0 0 L0 -34 Z', fill: '#17110e' }, figIn);
+      el('path', { class: 'l2', d: 'M0 -34 L2 -3 L1 0 L13 0 L8 -34 Z', fill: '#1f1713' }, figIn);
+      const youLean = el('g', { class: 'bodyg' }, figIn);
+      torso(youLean);
+      const sit = el('g', { opacity: 0 }, fig);
+      el('path', { d: 'M-10 -36 h30 q5 0 5 5 v5 h-35 Z', fill: '#1f1713' }, sit);
+      el('path', { d: 'M15 -32 h10 L27 0 h6 v3 h-17 Z', fill: '#17110e' }, sit);
+      torso(el('g', { transform: 'translate(0 -4)' }, sit));
+
+      const em = el('g', { id: 'ember', transform: `translate(2950 ${GY + 8})` }, L);
+      el('circle', { cx: 0, cy: -70, r: 250, fill: 'url(#gLight)', class: 'halo' }, em);
+      flame(em, 'translate(-22 0) scale(-1.5 1.55)', true);
+      flame(em, 'translate(24 0) scale(1.35 1.8)', true);
+      flame(em, 'translate(-6 0) scale(-1.1 2.3)', true);
+      flame(em, 'translate(2 0) scale(2 2.1)');
+      flame(em, 'translate(-20 2) scale(-1 1)');
+      flame(em, 'translate(26 2) scale(.8 .9)');
+
+      for (let i = 0; i < 70; i++) {
+        const x = -2600 + i * 170 + J(0, 60);
+        const h = 40 + rnd() * 70;
+        const y = 990;
+        el('path', { d: hand([[x - 40, y], [x - 30, y - h * 0.6], [x - 12, y - h], [x + 8, y - h * 0.7], [x + 26, y - h * 0.9], [x + 44, y]], 4), fill: '#0b0807' }, Lfo);
+      }
+
+      /* ---------- Landmarks & Tags ---------- */
+      const tagDefs = [];
+      function tag(layer, x, y, label, sub, on) {
+        const a = el('circle', { cx: x, cy: y, r: 1, fill: 'none' }, layer);
+        const d = document.createElement('div');
+        d.className = 'tag';
+        d.innerHTML = label + (sub ? `<small>${sub}</small>` : '');
+        d.style.setProperty('--r', `${J(0, 2.5).toFixed(1)}deg`);
+        document.body.appendChild(d);
+        tagDefs.push({ a, d, on });
+      }
+
+      tag(L, 3900, GY - 190, 'Randstad', 'call, Thu Sep 24', [3]);
+      tag(L, 760, GY - 120, 'August', '', [1]);
+      tag(L, 2090, GY - 120, 'early September', '', [1]);
+      tag(L, 2480, GY - 40, 'You are here', '', [1]);
+      noHouses.forEach(([n, x], i) => tag(Lf, x, 574 - i * 6 - 42, n, i ? 'Aug 17 → Sep 29' : 'Aug 6 → Sep 28', [2]));
+
+      function placeTags(hi) {
+        const activeStory = document.body.classList.contains('mode-story');
+        tagDefs.forEach((t) => {
+          const show = t.on.includes(hi) && activeStory;
+          t.d.classList.toggle('on', show);
+          if (show) {
+            const r = t.a.getBoundingClientRect();
+            t.d.style.left = `${r.left + r.width / 2}px`;
+            t.d.style.top = `${r.top - 14}px`;
+          }
+        });
+      }
+
+      /* ---------- Camera & Step Scroll ---------- */
+      const K = [
+        { x: 2930, z: 1.0, fx: 2806 },
+        { x: 1480, z: 0.5, px: 1650, pz: 0.42, fx: 2806 },
+        { x: 2500, z: 0.95, pz: 1.5, y: 610, fx: 2806 },
+        { x: 3500, z: 0.8, px: 3450, pz: 0.6, fx: 2806 },
+        { x: 4200, z: 0.6, px: 3600, pz: 0.5, fx: 2806 },
+        { x: 2930, z: 1.1, fx: 2806 }
+      ];
+      const LF = { far: 0.3, mid: 0.6, main: 1, fore: 1.3 };
+      const steps = [...document.querySelectorAll('.step')];
+      let target = 0,
+        cur = 0,
+        lastFx = K[0].fx,
+        curStep = -1;
+      const sm = (t) => t * t * (3 - 2 * t);
+      const lerp = (a, b, t) => a + (b - a) * t;
+
+      function progress() {
+        const vc = scrollY + innerHeight * 0.55;
+        const c = steps.map((s) => s.offsetTop + s.offsetHeight * 0.6);
+        if (vc <= c[0]) return 0;
+        for (let i = 0; i < c.length - 1; i++) {
+          if (vc < c[i + 1]) {
+            let t = (vc - c[i]) / (c[i + 1] - c[i]);
+            t = Math.min(1, Math.max(0, (t - 0.15) / 0.7));
+            return i + sm(t);
+          }
+        }
+        return c.length - 1;
+      }
+
+      function frame() {
+        target = progress();
+        cur += (target - cur) * 0.085;
+        if (Math.abs(target - cur) < 0.0005) cur = target;
+        const i = Math.min(K.length - 2, Math.floor(cur));
+        const t = cur - i;
+        const a = K[i];
+        const b = K[i + 1];
+        const P = innerHeight > innerWidth * 1.1;
+        const mf = P ? 0.5 : 1;
+        const kz = (k) => ((P && k.pz) || k.z) * mf;
+        const kx = (k) => (P && k.px) || k.x;
+        const off = P ? -72 : 20;
+        const z = Math.exp(lerp(Math.log(kz(a)), Math.log(kz(b)), t));
+        const x = lerp(kx(a), kx(b), t);
+        const ya = a.y ?? GY - off / kz(a);
+        const yb = b.y ?? GY - off / kz(b);
+        const y = lerp(ya, yb, t);
+
+        Lf.setAttribute('transform', `translate(800 450) scale(${z}) translate(${-x * LF.far} ${-y * 0.85})`);
+        Lm.setAttribute('transform', `translate(800 450) scale(${z}) translate(${-x * LF.mid} ${-y * 0.92})`);
+        L.setAttribute('transform', `translate(800 450) scale(${z}) translate(${-x} ${-y})`);
+        Lfo.setAttribute('transform', `translate(800 450) scale(${z}) translate(${-x * LF.fore} ${-y})`);
+        $('moon').setAttribute('transform', `translate(${-x * 0.02} 0)`);
+
+        const fx = lerp(a.fx, b.fx, t);
+        const moving = Math.abs(fx - lastFx) > 0.4;
+        fig.classList.toggle('walking', moving);
+        const dir = fx < lastFx - 0.4 ? -1 : 1;
+        const ys = 0.82;
+        fig.setAttribute('transform', `translate(${fx} ${GY + (fx > 3460 && fx < 5200 ? 16 : 6)}) scale(${dir * ys} ${ys})`);
+        lastFx = fx;
+        sit.setAttribute('opacity', 1);
+        figIn.setAttribute('opacity', 0);
+
+        lants.forEach((l) => {
+          const on = fx >= l.x - 10 || cur >= 3.98;
+          if (on !== l.on) {
+            l.on = on;
+            l.glow.setAttribute('opacity', on ? 1 : 0);
+            l.pool.setAttribute('opacity', on ? 0.35 : 0);
+            l.body.setAttribute('fill', on ? '#f2894d' : '#3b2a21');
+          }
+        });
+
+        const hi = Math.round(cur);
+        hglow.setAttribute('opacity', 0.7);
+        fogs.forEach((f, k) => f.setAttribute('transform', `translate(${Math.sin(performance.now() / 9000 + k) * 60} 0)`));
+        placeTags(hi);
+        if (hi !== curStep) {
+          curStep = hi;
+          steps.forEach((s, k) => s.classList.toggle('on', k === hi));
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+
+      /* ---------- Landmark Tap Tooltips ---------- */
+      const tipEl = $('tip');
+      let tipT;
+      function showTip(txt, x, y) {
+        tipEl.textContent = txt;
+        tipEl.style.left = `${x}px`;
+        tipEl.style.top = `${y}px`;
+        tipEl.classList.add('on');
+        clearTimeout(tipT);
+        tipT = setTimeout(() => tipEl.classList.remove('on'), 3200);
+      }
+
+      document.addEventListener('click', (e) => {
+        if (!document.body.classList.contains('mode-story')) return;
+        if (e.target.closest('.card,.bar,.nav')) return;
+        const hits = document.elementsFromPoint(e.clientX, e.clientY).filter((n) => n.classList && n.classList.contains('hitc'));
+        if (hits[0]) showTip(hits[0].dataset.tip, e.clientX, e.clientY);
+      });
+
+      document.querySelectorAll('.hitc').forEach((h) =>
+        h.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            const r = h.getBoundingClientRect();
+            showTip(h.dataset.tip, r.left + r.width / 2, r.top);
+          }
+        })
+      );
+
+      /* ---------- Sound: Fire Crackle & Wind ---------- */
+      let ac = null,
+        master = null;
+      function startSound() {
+        if (ac) return;
+        try {
+          ac = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (_) {
+          return;
+        }
+        master = ac.createGain();
+        master.gain.value = 0;
+        master.connect(ac.destination);
+        master.gain.linearRampToValueAtTime(0.55, ac.currentTime + 2);
+
+        const buf = ac.createBuffer(1, ac.sampleRate * 3, ac.sampleRate);
+        const d = buf.getChannelData(0);
+        let b = 0;
+        for (let i = 0; i < d.length; i++) {
+          const w = Math.random() * 2 - 1;
+          b = (b + 0.02 * w) / 1.02;
+          d[i] = b * 3.5;
+        }
+        const rum = ac.createBufferSource();
+        rum.buffer = buf;
+        rum.loop = true;
+        const lp = ac.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = 320;
+        const rg = ac.createGain();
+        rg.gain.value = 0.35;
+        rum.connect(lp).connect(rg).connect(master);
+        rum.start();
+
+        const wb = ac.createBuffer(1, ac.sampleRate * 4, ac.sampleRate);
+        const wd = wb.getChannelData(0);
+        for (let i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
+        const wind = ac.createBufferSource();
+        wind.buffer = wb;
+        wind.loop = true;
+        const bp = ac.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 500;
+        bp.Q.value = 0.6;
+        const wg = ac.createGain();
+        wg.gain.value = 0.025;
+        const lfo = ac.createOscillator();
+        const lg = ac.createGain();
+        lfo.frequency.value = 0.07;
+        lg.gain.value = 0.018;
+        lfo.connect(lg).connect(wg.gain);
+        lfo.start();
+        wind.connect(bp).connect(wg).connect(master);
+        wind.start();
+
+        const pop = () => {
+          if (!ac || ac.state === 'closed') return;
+          const n = ac.createBufferSource();
+          n.buffer = wb;
+          const hp = ac.createBiquadFilter();
+          hp.type = 'highpass';
+          hp.frequency.value = 1200 + Math.random() * 3500;
+          const g = ac.createGain();
+          const t = ac.currentTime;
+          const pk = 0.04 + Math.random() * 0.18;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(pk, t + 0.003);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03 + Math.random() * 0.06);
+          n.connect(hp).connect(g).connect(master);
+          n.start(t, Math.random() * 3, 0.12);
+          setTimeout(pop, Math.random() < 0.2 ? 40 + Math.random() * 80 : 180 + Math.random() * 700);
+        };
+        pop();
+      }
+
+      function setSound(on) {
+        const b = $('sound');
+        b.setAttribute('aria-pressed', String(on));
+        b.textContent = on ? 'Sound on' : 'Sound';
+        if (on) {
+          if (!ac) startSound();
+          else {
+            ac.resume();
+            master.gain.linearRampToValueAtTime(0.55, ac.currentTime + 0.8);
+          }
+        } else if (ac && master) {
+          master.gain.linearRampToValueAtTime(0, ac.currentTime + 0.6);
+        }
+      }
+
+      $('sound').addEventListener('click', () => setSound($('sound').getAttribute('aria-pressed') !== 'true'));
+
+      function duck(on) {
+        if (ac && master && $('sound').getAttribute('aria-pressed') === 'true') {
+          master.gain.linearRampToValueAtTime(on ? 0.22 : 0.55, ac.currentTime + 0.5);
+        }
+      }
+
+      /* ---------- Step Navigation ---------- */
+      const stepTop = (n) => steps[n].offsetTop + steps[n].offsetHeight * 0.6 - innerHeight * 0.55 + 2;
+      function goStep(n) {
+        n = Math.max(0, Math.min(steps.length - 1, n));
+        window.scrollTo({ top: stepTop(n), behavior: reducedMotion ? 'auto' : 'smooth' });
+      }
+
+      const nextB = $('next'),
+        prevB = $('prev');
+      nextB.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goStep(Math.max(0, curStep) + 1);
+      });
+      prevB.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goStep(Math.max(0, curStep) - 1);
+      });
+      document.querySelectorAll('.card').forEach((c) =>
+        c.addEventListener('click', () => {
+          if (curStep < steps.length - 1) goStep(curStep + 1);
+        })
+      );
+
+      addEventListener('keydown', (e) => {
+        if (!document.body.classList.contains('mode-story')) return;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          goStep(curStep + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          goStep(curStep - 1);
+        } else if (e.key === 'Escape') {
+          returnToPorch();
+        }
+      });
+
+      setInterval(() => {
+        const last = curStep >= steps.length - 1;
+        nextB.style.visibility = last ? 'hidden' : 'visible';
+        prevB.style.visibility = curStep > 0 ? 'visible' : 'hidden';
+      }, 300);
+
+      /* ---------- Voice & Speech Narration ---------- */
+      let playing = false,
+        token = 0;
+      const lb = $('listen'),
+        vs = $('voice');
+      const VOICE_PRESETS = {
+        ember: { rate: 0.94, pitch: 0.98, lang: 'en-US' },
+        'ember-soft': { rate: 0.86, pitch: 0.9, lang: 'en-US' },
+        'ember-gb': { rate: 0.94, pitch: 1.0, lang: 'en-GB' }
+      };
+
+      function setPlaying(on, speaking) {
+        playing = on;
+        lb.textContent = on ? 'Stop' : 'Listen';
+        lb.setAttribute('aria-pressed', String(on));
+        em.classList.toggle('talk', !!speaking);
+        document.body.classList.toggle('talking', !!speaking);
+        duck(on);
+      }
+
+      function stopReading() {
+        token++;
+        if ('speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel();
+          } catch (_) {}
+        }
+        setPlaying(false, false);
+      }
+
+      function readAll(from = 0) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        token++;
+        const my = token;
+        setPlaying(true, true);
+        const preset = VOICE_PRESETS[vs.value] || VOICE_PRESETS.ember;
+
+        const say = (i) => {
+          if (my !== token) return;
+          if (i >= steps.length) {
+            setPlaying(false, false);
+            return;
+          }
+          goStep(i);
+          const u = new SpeechSynthesisUtterance(steps[i].dataset.say || '');
+          u.rate = preset.rate;
+          u.pitch = preset.pitch;
+          u.lang = preset.lang;
+          u.onend = () => {
+            if (my === token) setTimeout(() => say(i + 1), 600);
+          };
+          u.onerror = () => {
+            if (my === token) setPlaying(false, false);
+          };
+          window.speechSynthesis.speak(u);
+        };
+        say(from);
+      }
+
+      lb.addEventListener('click', () => {
+        if (playing) stopReading();
+        else readAll(Math.max(0, curStep));
+      });
+      vs.addEventListener('change', () => {
+        const was = playing;
+        stopReading();
+        if (was) setTimeout(() => readAll(Math.max(0, curStep)), 300);
+      });
+
+      /* ---------- Porch -> Envelope -> Letter Flow ---------- */
+      const sealEl = $('seal');
+      let openingInProgress = false;
+
+      function resetEnvelopeState() {
+        openingInProgress = false;
+        sealEl.classList.remove('opening', 'opened');
+      }
+
+      function openSealedEnvelopeFlow() {
+        stopReading();
+        resetEnvelopeState();
+        document.body.classList.remove('mode-porch', 'mode-story');
+        document.body.classList.add('mode-sealed');
+        window.scrollTo(0, 0);
+      }
+
+      function returnToPorch() {
+        stopReading();
+        setSound(false);
+        resetEnvelopeState();
+        document.body.classList.remove('mode-sealed', 'mode-story');
+        document.body.classList.add('mode-porch');
+        window.scrollTo(0, 0);
+      }
+
+      emberLetter.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSealedEnvelopeFlow();
+      });
+
+      emberLetter.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openSealedEnvelopeFlow();
+        }
+      });
+
+      $('back-to-porch-btn').addEventListener('click', returnToPorch);
+      $('seal-back-btn').addEventListener('click', returnToPorch);
+
+      function sparks() {
+        if (reducedMotion) return;
+        const r = $('wax').getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        for (let i = 0; i < 22; i++) {
+          const s = document.createElement('div');
+          s.className = 'spark';
+          s.style.left = `${cx}px`;
+          s.style.top = `${cy}px`;
+          document.body.appendChild(s);
+          const a = Math.random() * Math.PI * 2;
+          const d = 40 + Math.random() * 120;
+          s.animate(
+            [
+              { transform: 'translate(0,0)', opacity: 1 },
+              { transform: `translate(${Math.cos(a) * d}px,${Math.sin(a) * d - 60}px)`, opacity: 0 }
+            ],
+            { duration: 700 + Math.random() * 700, easing: 'cubic-bezier(.2,.7,.3,1)' }
+          ).onfinish = () => s.remove();
+        }
+      }
+
+      function openLetter(listen) {
+        if (openingInProgress) return;
+        openingInProgress = true;
+        sparks();
+        sealEl.classList.add('opening');
+        if (listen) setSound(true);
+
+        const delayOpened = reducedMotion ? 100 : 1900;
+        const delayStory = reducedMotion ? 220 : 2500;
+
+        setTimeout(() => {
+          if (!openingInProgress) return;
+          sealEl.classList.add('opened');
+        }, delayOpened);
+
+        setTimeout(() => {
+          if (!openingInProgress) return;
+          document.body.classList.remove('mode-sealed', 'mode-porch');
+          document.body.classList.add('mode-story');
+          resetEnvelopeState();
+          window.scrollTo(0, 0);
+          goStep(0);
+          if (listen) setTimeout(() => readAll(0), 400);
+        }, delayStory);
+      }
+
+      $('wax').addEventListener('click', () => openLetter(false));
+      $('openQuiet').addEventListener('click', () => openLetter(false));
+      $('openListen').addEventListener('click', () => openLetter(true));
+    })();
+  </script>
+</body>
+</html>
