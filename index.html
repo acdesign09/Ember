@@ -105,24 +105,13 @@
       inset: 0;
       z-index: 0;
       background-color: var(--night);
-      background-image:
-        var(--porch-art),
-        radial-gradient(ellipse 50% 64% at 30% 58%, rgba(194, 80, 31, 0.3), transparent 68%),
-        radial-gradient(ellipse 22% 18% at 80% 16%, rgba(243, 232, 214, 0.16), transparent 72%),
-        linear-gradient(180deg, #120d0b 0%, #1c1210 46%, #2a1a14 100%);
+      /* Render the original artwork as-is. No tint, texture, gradient,
+         vignette, or overlay is applied to the source image. */
+      background-image: var(--porch-art);
       background-repeat: no-repeat;
-      background-size: cover, auto, auto, auto;
-      background-position: center, center, center, center;
-    }
-
-    .porch-backdrop::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(18, 13, 11, 0.18), transparent 28% 64%, rgba(18, 13, 11, 0.42)),
-        radial-gradient(ellipse at 34% 52%, transparent 40%, rgba(8, 5, 4, 0.5) 100%);
+      background-size: contain;
+      background-position: left center;
+      background-color: var(--night);
     }
 
     .brand {
