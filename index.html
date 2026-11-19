@@ -672,11 +672,9 @@
       }
 
       function openLetter() {
-        if (document.body.dataset.view === "letter") return;
-        show("letter");
-        letterKeys = new AbortController();
-        document.addEventListener("keydown", onLetterKeydown, { signal: letterKeys.signal });
-        ui.letter.focus({ preventScroll: true });
+        // Use the actual sample-letter experience, including its envelope,
+        // scene-by-scene reading, and original recorded Ember voices.
+        window.location.assign("./reference/Ember%20letter%20prototype_%20A%20quiet%20week/index.html");
       }
 
       function closeLetter() {
