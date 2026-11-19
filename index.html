@@ -43,7 +43,7 @@
 
         To point at a different export, change only these two lines:
       */
-      --porch-art: url("./reference/background.png");
+      --porch-art: url("./reference/background2.svg");
       --ember-art: url("./reference/flame%20guy.svg");
       /* Nudge the letter onto the character's hand once art is in. */
       --letter-x: 50%;
@@ -103,17 +103,15 @@
     .porch-backdrop {
       position: absolute;
       z-index: 0;
-      left: 0;
-      top: 50%;
-      width: min(100vw, 1200px);
-      aspect-ratio: 1000 / 563;
-      transform: translateY(-50%);
+      inset: 0;
+      width: 100%;
+      height: 100%;
       background-color: var(--night);
-      /* Keep the source illustration at a restrained scale so it stays crisp.
-         The scene keeps its original 1000:563 proportions at every size. */
+      /* Fill the viewport without distorting the original illustration.
+         A small amount of edge cropping is preferable to empty bands. */
       background-image: var(--porch-art);
       background-repeat: no-repeat;
-      background-size: 100% 100%;
+      background-size: cover;
       background-position: center;
     }
 
@@ -507,9 +505,11 @@
       }
 
       .porch-backdrop {
-        top: 0;
-        width: 100vw;
-        transform: none;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-size: auto 100%;
+        background-position: center top;
       }
 
       .ember-slot {
