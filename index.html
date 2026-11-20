@@ -113,29 +113,10 @@
       height: max(100dvh, 56.3vw);
       transform: translate(-50%, -50%);
       background-color: var(--night);
-      background-image: none;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
-      background-position: center;
-    }
-
-    /* A tiny amount of smoothing can hide hairline seams created when
-       adjacent traced vector regions are rasterized by the browser.
-       Keep this on the artwork layer only; Ember stays crisp above it. */
-    .porch-backdrop::before {
-      content: "";
-      position: absolute;
-      z-index: 0;
-      inset: 0;
       background-image: var(--porch-art);
       background-repeat: no-repeat;
       background-size: 100% 100%;
       background-position: center;
-      filter: blur(0.2px);
-    }
-
-    .ember-slot {
-      z-index: 1;
     }
 
     @media (min-width: 901px) {
@@ -544,10 +525,6 @@
         background-position: center top;
       }
 
-      .porch-backdrop::before {
-        background-size: auto 100%;
-        background-position: center top;
-      }
 
       .ember-slot {
         left: 37%;
